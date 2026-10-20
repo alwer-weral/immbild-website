@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>immbild – Immobilien zum Durchgehen</title>
+  <meta name="description" content="immbild ist ein neues Demo-Projekt: eine kleine Website über 3D-Rundgänge für Immobilien – gebaut mit HTML, CSS und JavaScript, veröffentlicht über GitHub und Netlify.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23267a48'/%3E%3Cpath d='M6 16 16 7l10 9v9H6z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="#top" aria-label="immbild Startseite">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M6 16 16 7l10 9v9H6z" fill="#fff"/></svg>
+    <span>imm<b>bild</b></span>
+  </a>
+  <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü">☰</button>
+  <nav id="nav">
+    <a href="#leistungen">Leistungen</a>
+    <a href="#vorher-nachher">Vergleich</a>
+    <a href="#galerie">Galerie</a>
+    <a href="#ablauf">Ablauf</a>
+    <a href="#kontakt" class="btn small">Anfrage</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Neu gebaut · Demo-Projekt</p>
+      <h1>Immobilien <em>zum Durchgehen.</em></h1>
+      <p class="lead">Ein Foto zeigt eine Ecke, ein 3D-Rundgang zeigt das ganze Zuhause. Interessenten gehen Raum für Raum durch, von jedem Ort der Welt, zu jeder Uhrzeit.</p>
+      <p>
+        <a class="btn" href="#kontakt">Anfrage stellen</a>
+        <a class="btn ghost" href="#vorher-nachher">Unterschied ansehen</a>
+      </p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 420 340" role="img">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cfe8d8"/><stop offset="1" stop-color="#f6f1e4"/>
+          </linearGradient>
+        </defs>
+        <rect width="420" height="340" rx="22" fill="url(#sky)"/>
+        <circle class="sun" cx="330" cy="80" r="34" fill="#f2c14e"/>
+        <path d="M0 270 Q110 230 210 262 T420 250 V340 H0Z" fill="#8fc7a2"/>
+        <path d="M0 300 Q140 270 260 296 T420 290 V340 H0Z" fill="#267a48"/>
+        <g>
+          <path d="M92 190 210 98l118 92v100H92z" fill="#fffaf0" stroke="#1d3b2a" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M78 196 210 88l132 108" fill="none" stroke="#a4452c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="188" y="226" width="44" height="64" rx="4" fill="#a4452c"/>
+          <rect x="116" y="204" width="48" height="42" rx="3" fill="#cfe8f2" stroke="#1d3b2a" stroke-width="3"/>
+          <rect x="256" y="204" width="48" height="42" rx="3" fill="#cfe8f2" stroke="#1d3b2a" stroke-width="3"/>
+          <line x1="140" y1="204" x2="140" y2="246" stroke="#1d3b2a" stroke-width="3"/>
+          <line x1="280" y1="204" x2="280" y2="246" stroke="#1d3b2a" stroke-width="3"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="leistungen" class="block">
+    <h2>Was ein Rundgang kann</h2>
+    <p class="sub">Drei Gründe, warum aus einem Inserat ein Besuch im Kopf wird.</p>
+    <div class="cards">
+      <article class="card">
+        <span class="icon" aria-hidden="true">◎</span>
+        <h3>Begehbar</h3>
+        <p>Interessenten bewegen sich selbst durch alle Räume, drehen den Blick und gehen von Punkt zu Punkt, statt auf ausgewählte Bilder zu warten.</p>
+      </article>
+      <article class="card">
+        <span class="icon" aria-hidden="true">▢</span>
+        <h3>Maßstäblich</h3>
+        <p>Aus dem Scan entstehen Grundriss und Abmessungen. Wer sich die Wohnung ansieht, versteht auch, ob das Sofa passt.</p>
+      </article>
+      <article class="card">
+        <span class="icon" aria-hidden="true">✦</span>
+        <h3>Immer erreichbar</h3>
+        <p>Ein Link genügt. Der Rundgang steht im Exposé, auf dem Portal oder auf der eigenen Seite, rund um die Uhr, ohne Besichtigungstermin.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="vorher-nachher" class="block alt">
+    <h2>Exposé ohne und mit Rundgang</h2>
+    <p class="sub">Ziehe den Regler. Links ein Exposé mit wenigen, dunklen Fotos, rechts derselbe Raum als heller, begehbarer Rundgang.</p>
+    <div class="compare" id="compare">
+      <svg class="room room-after" viewBox="0 0 800 450" aria-hidden="true">
+        <rect width="800" height="450" fill="#fbf4e3"/>
+        <rect y="330" width="800" height="120" fill="#d8b98a"/>
+        <rect x="90" y="60" width="210" height="220" rx="4" fill="#cfe8f2" stroke="#fff" stroke-width="10"/>
+        <line x1="195" y1="60" x2="195" y2="280" stroke="#fff" stroke-width="8"/>
+        <polygon points="90,330 300,330 360,450 40,450" fill="#fff6c8" opacity=".7"/>
+        <rect x="420" y="240" width="300" height="100" rx="14" fill="#267a48"/>
+        <rect x="420" y="210" width="300" height="50" rx="14" fill="#2f9159"/>
+        <rect x="560" y="120" width="120" height="80" fill="#f2c14e" stroke="#1d3b2a" stroke-width="3"/>
+        <circle cx="660" cy="395" r="22" fill="#a4452c"/>
+        <path d="M660 373v-30M660 360c-14-6-18-18-14-28 14 4 18 16 14 28zM660 356c14-6 18-18 14-28-14 4-18 16-14 28z" fill="#267a48" stroke="#1d3b2a" stroke-width="2"/>
+      </svg>
+      <div class="room-before-wrap" id="beforeWrap">
+        <svg class="room room-before" viewBox="0 0 800 450" aria-hidden="true">
+          <rect width="800" height="450" fill="#8a8678"/>
+          <rect y="330" width="800" height="120" fill="#6e6a5e"/>
+          <rect x="90" y="60" width="210" height="220" rx="4" fill="#5f6a70" stroke="#777" stroke-width="10"/>
+          <line x1="195" y1="60" x2="195" y2="280" stroke="#777" stroke-width="8"/>
+          <rect x="420" y="250" width="300" height="90" rx="10" fill="#555"/>
+          <rect x="400" y="300" width="70" height="60" fill="#7b5e3d"/>
+          <rect x="520" y="330" width="120" height="70" fill="#7b5e3d"/>
+          <rect x="240" y="340" width="90" height="70" fill="#9a8d6a"/>
+          <rect x="650" y="360" width="60" height="50" fill="#7b5e3d"/>
+        </svg>
+      </div>
+      <div class="handle" id="handle" role="slider" tabindex="0" aria-label="Vorher-Nachher-Regler" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span></span></div>
+      <span class="tag left">nur Fotos</span><span class="tag right">mit Rundgang</span>
+    </div>
+  </section>
+
+  <section id="galerie" class="block">
+    <h2>Galerie</h2>
+    <p class="sub">Gezeichnete Beispiele für Objekte, die sich als Rundgang eignen. Wähle eine Objektart.</p>
+    <div class="filters" role="group" aria-label="Filter">
+      <button class="chip active" data-filter="alle">Alle</button>
+      <button class="chip" data-filter="wohnung">Wohnung</button>
+      <button class="chip" data-filter="haus">Haus</button>
+      <button class="chip" data-filter="gewerbe">Gewerbe</button>
+    </div>
+    <div class="grid" id="grid">
+      <figure data-kind="wohnung" style="--c1:#cfe8d8;--c2:#267a48"><div class="shape s1"></div><figcaption>Altbau, 3 Zimmer<small>Wohnung</small></figcaption></figure>
+      <figure data-kind="haus" style="--c1:#f4dcc8;--c2:#a4452c"><div class="shape s2"></div><figcaption>Reihenhaus mit Garten<small>Haus</small></figcaption></figure>
+      <figure data-kind="gewerbe" style="--c1:#d6e0ee;--c2:#34507a"><div class="shape s3"></div><figcaption>Ladenfläche, Erdgeschoss<small>Gewerbe</small></figcaption></figure>
+      <figure data-kind="wohnung" style="--c1:#f6efc9;--c2:#b58b12"><div class="shape s2"></div><figcaption>Dachgeschoss, offen<small>Wohnung</small></figcaption></figure>
+      <figure data-kind="haus" style="--c1:#e2d6ee;--c2:#5d3c85"><div class="shape s1"></div><figcaption>Stadtvilla<small>Haus</small></figcaption></figure>
+      <figure data-kind="gewerbe" style="--c1:#d3ece9;--c2:#1f7a72"><div class="shape s3"></div><figcaption>Praxisräume<small>Gewerbe</small></figcaption></figure>
+    </div>
+  </section>
+
+  <section id="ablauf" class="block alt">
+    <h2>Ablauf in vier Schritten</h2>
+    <ol class="steps">
+      <li><b>Anfrage</b><span>Du beschreibst Objekt, Größe und Ziel.</span></li>
+      <li><b>Termin</b><span>Wir legen den Tag mit dem besten Licht fest.</span></li>
+      <li><b>Scan</b><span>Raum für Raum wird mit der 3D-Kamera erfasst.</span></li>
+      <li><b>Link</b><span>Der fertige Rundgang kommt als Link fürs Exposé.</span></li>
+    </ol>
+  </section>
+
+  <section id="kontakt" class="block">
+    <h2>Anfrage</h2>
+    <p class="sub">Dies ist ein Demo-Formular. Es läuft über Netlify Forms.</p>
+    <form name="anfrage" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="form" id="form">
+      <input type="hidden" name="form-name" value="anfrage">
+      <p hidden><label>Nicht ausfüllen: <input name="bot-field"></label></p>
+      <label>Name<input name="name" required autocomplete="name"></label>
+      <label>E-Mail<input type="email" name="email" required autocomplete="email"></label>
+      <label>Objektart
+        <select name="objekt">
+          <option>Wohnung</option><option>Haus</option><option>Gewerbe</option>
+        </select>
+      </label>
+      <label>Nachricht<textarea name="nachricht" rows="4"></textarea></label>
+      <button class="btn" type="submit">Absenden</button>
+      <p class="msg" id="msg" role="status"></p>
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  <p><b>immbild</b> · Übungsprojekt: neue Website mit HTML, CSS und JavaScript, über GitHub und Netlify veröffentlicht. Alle Inhalte sind Demo-Inhalte.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
