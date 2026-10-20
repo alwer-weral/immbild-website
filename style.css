@@ -37,7 +37,7 @@ p { margin: 0 0 1em; }
 /* Header */
 .site-header { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
   padding: 1rem clamp(1rem, 4vw, 3rem); transition: background .3s, padding .3s, backdrop-filter .3s; }
-.site-header.scrolled { background: rgba(7, 8, 10, .72); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-bottom: 1px solid var(--line); padding-block: .6rem; }
+.site-header.scrolled { background: rgba(7, 8, 10, .94); border-bottom: 1px solid var(--line); padding-block: .6rem; }
 .logo { font-size: 1.7rem; font-weight: 800; letter-spacing: -.04em; text-decoration: none; }
 .logo b { color: var(--ink); } .logo i { color: var(--gold); font-style: normal; }
 nav { display: flex; align-items: center; gap: 1.6rem; }
@@ -71,7 +71,7 @@ nav a.btn { color: #101010; }
 @keyframes blink { 50% { opacity: .3; } }
 .hero-lead { font-size: clamp(1.05rem, 2vw, 1.35rem); color: #cfcdc4; max-width: 38em; margin: 1.6rem 0 2.2rem; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: .9rem; }
-.hud { position: absolute; right: clamp(1rem, 4vw, 3rem); bottom: 2.4rem; width: 200px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .8rem; color: var(--gold); padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: rgba(7, 8, 10, .6); backdrop-filter: blur(8px); }
+.hud { position: absolute; right: clamp(1rem, 4vw, 3rem); bottom: 2.4rem; width: 200px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .8rem; color: var(--gold); padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: rgba(7, 8, 10, .82); }
 .hud-row { display: flex; gap: .5rem; align-items: baseline; } .hud-row b { font-size: 1.8rem; color: var(--ink); } .hud-row.small b { font-size: .9rem; }
 .hud-bar { height: 3px; background: var(--line); margin: .5rem 0 .7rem; border-radius: 3px; overflow: hidden; } .hud-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--cyan)); }
 .scroll-hint { position: absolute; left: 50%; bottom: 1.2rem; width: 26px; height: 42px; border: 2px solid var(--line); border-radius: 14px; transform: translateX(-50%); }

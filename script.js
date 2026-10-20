@@ -87,22 +87,39 @@ nav.addEventListener('click', e => {
   pts.sort((a, b) => a.x - b.x);
 
   const cols = { edge: [255, 244, 190], floor: [120, 130, 140], wall: [241, 210, 82], int: [255, 185, 74], roof: [241, 120, 82], furn: [93, 224, 230], ground: [90, 100, 100], tree: [120, 200, 130] };
-  let W, H, dpr, yaw = -0.6, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, scrollP = 0;
+  const kinds = Object.keys(cols), LV = 5;
+  const kindIdx = {}; kinds.forEach((k, i) => { kindIdx[k] = i; });
+  pts.forEach(p => { p.ki = kindIdx[p.k]; });
+  const styles = kinds.map(k => Array.from({ length: LV }, (_, l) => {
+    const a = (k === 'ground' ? 0.35 : 0.85) * (0.15 + 0.85 * (l + 1) / LV);
+    return `rgba(${cols[k][0]},${cols[k][1]},${cols[k][2]},${a.toFixed(2)})`;
+  }));
+  const buckets = kinds.map(() => Array.from({ length: LV }, () => new Float32Array(N * 3)));
+  const counts = new Int32Array(kinds.length * LV);
+  const laserBuf = new Float32Array(N * 3);
+
+  let W, H, dpr, yaw = -0.6, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
 
   function resize() {
-    dpr = Math.min(devicePixelRatio || 1, 2);
+    dpr = Math.min(devicePixelRatio || 1, 1.25);
     W = canvas.clientWidth; H = canvas.clientHeight;
     canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize(); addEventListener('resize', resize);
   hero.addEventListener('pointermove', e => { mx = (e.clientX / innerWidth - .5) * 2; my = (e.clientY / innerHeight - .5) * 2; });
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) requestAnimationFrame(frame); }).observe(hero);
   addEventListener('scroll', () => { scrollP = Math.min(1, scrollY / innerHeight); }, { passive: true });
 
+  function start() { if (!running && visible && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(hero);
+  document.addEventListener('visibilitychange', start);
+
   function frame(t) {
-    if (!visible) return;
-    const dt = Math.min(50, t - last || 16); last = t;
+    if (!visible || document.hidden) { running = false; return; }
+    requestAnimationFrame(frame);
+    if (t - lastDraw < 32) return;            // höchstens etwa 30 Bilder pro Sekunde
+    lastDraw = t;
+    const dt = Math.min(80, t - last || 33); last = t;
     if (!reduceMotion) { sweep = Math.min(1, sweep + dt / 4200); yaw += dt * 0.00009; }
     const yw = yaw + mx * 0.35 + scrollP * 1.2;
     const pitch = 0.42 + my * 0.08 - scrollP * 0.2;
@@ -112,8 +129,8 @@ nav.addEventListener('click', e => {
     const camZ = 10;
     const edge = -3.6 + sweep * 7.2;
 
-    ctx.clearRect(0, 0, W, H);
-    let shown = 0;
+    counts.fill(0);
+    let laserN = 0, shown = 0;
     for (let i = 0; i < pts.length; i++) {
       const p = pts[i];
       if (p.x > edge) break;
@@ -122,19 +139,36 @@ nav.addEventListener('click', e => {
       const y2 = (p.y - 0.6) * cp - z1 * sp, z2 = (p.y - 0.6) * sp + z1 * cp;
       const f = camZ / (camZ + z2);
       const sx = cx + x1 * scale * f, sy2 = cyy - y2 * scale * f;
-      const c = cols[p.k];
+      if (edge - p.x < 0.07) { const o = laserN * 3; laserBuf[o] = sx; laserBuf[o + 1] = sy2; laserBuf[o + 2] = 3.4 * f; laserN++; continue; }
       const near = Math.max(0.15, Math.min(1, f * f * 0.85));
-      const laser = edge - p.x < 0.07;
-      ctx.fillStyle = laser ? 'rgba(93,224,230,.95)' : `rgba(${c[0]},${c[1]},${c[2]},${(p.k === 'ground' ? 0.35 : 0.85) * near})`;
-      const s = (laser ? 3.4 : 2.1) * f;
-      ctx.fillRect(sx, sy2, s, s);
+      const lv = Math.min(LV - 1, Math.floor(near * LV));
+      const b = p.ki * LV + lv, o = counts[b] * 3;
+      const buf = buckets[p.ki][lv];
+      buf[o] = sx; buf[o + 1] = sy2; buf[o + 2] = 2.1 * f;
+      counts[b]++;
     }
-    hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
-    hudBar.style.width = sweep * 100 + '%';
-    hudPts.textContent = (Math.round(shown * 38.5)).toLocaleString('de-DE');
-    requestAnimationFrame(frame);
+
+    ctx.clearRect(0, 0, W, H);
+    for (let k = 0; k < kinds.length; k++) {
+      for (let l = 0; l < LV; l++) {
+        const n = counts[k * LV + l];
+        if (!n) continue;
+        ctx.fillStyle = styles[k][l];
+        const buf = buckets[k][l];
+        for (let j = 0; j < n; j++) { const o = j * 3; ctx.fillRect(buf[o], buf[o + 1], buf[o + 2], buf[o + 2]); }
+      }
+    }
+    if (laserN) {
+      ctx.fillStyle = 'rgba(93,224,230,.95)';
+      for (let j = 0; j < laserN; j++) { const o = j * 3; ctx.fillRect(laserBuf[o], laserBuf[o + 1], laserBuf[o + 2], laserBuf[o + 2]); }
+    }
+    if (sweep < 1 || (++hudTick % 15 === 0)) {
+      hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
+      hudBar.style.width = sweep * 100 + '%';
+      hudPts.textContent = (Math.round(shown * 38.5)).toLocaleString('de-DE');
+    }
   }
-  requestAnimationFrame(frame);
+  start();
 })();
 
 /* ---------- Einblenden, Zähler ---------- */
