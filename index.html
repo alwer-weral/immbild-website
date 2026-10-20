@@ -2,173 +2,406 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>immbild – Immobilien zum Durchgehen</title>
-  <meta name="description" content="immbild ist ein neues Demo-Projekt: eine kleine Website über 3D-Rundgänge für Immobilien – gebaut mit HTML, CSS und JavaScript, veröffentlicht über GitHub und Netlify.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23267a48'/%3E%3Cpath d='M6 16 16 7l10 9v9H6z' fill='%23fff'/%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>immbild. – 3D-Rundgänge und Immobilienfotografie aus Erftstadt</title>
+  <meta name="description" content="Virtuelle 3D-Rundgänge mit Matterport und Leica BLK, dazu Immobilien-, Objekt- und Architekturfotografie. immbild. aus Erftstadt für Köln, Bonn, Rhein-Erft und die Eifel.">
+  <meta name="theme-color" content="#07080a">
+  <meta property="og:title" content="immbild. – Gehen Sie hinein, bevor Sie hingehen.">
+  <meta property="og:description" content="Virtuelle 3D-Rundgänge und Immobilienfotografie aus Erftstadt.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23f1d252' stroke-width='3'/%3E%3Cpath d='M16 10v6h5' fill='none' stroke='%23f1d252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="cursor-glow" aria-hidden="true"></div>
+<a class="skip" href="#main">Zum Inhalt springen</a>
 
-<header class="site-header">
-  <a class="logo" href="#top" aria-label="immbild Startseite">
-    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M6 16 16 7l10 9v9H6z" fill="#fff"/></svg>
-    <span>imm<b>bild</b></span>
-  </a>
-  <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü">☰</button>
-  <nav id="nav">
+<header class="site-header" id="header">
+  <a class="logo" href="#top" aria-label="immbild. Startseite">imm<b>bild</b><i>.</i></a>
+  <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü öffnen"><span></span><span></span></button>
+  <nav id="nav" aria-label="Hauptnavigation">
+    <a href="#erleben">Erleben</a>
     <a href="#leistungen">Leistungen</a>
-    <a href="#vorher-nachher">Vergleich</a>
-    <a href="#galerie">Galerie</a>
+    <a href="#technik">Technik</a>
     <a href="#ablauf">Ablauf</a>
-    <a href="#kontakt" class="btn small">Anfrage</a>
+    <a href="#konfigurator">Projekt planen</a>
+    <a href="#kontakt" class="btn btn-sm magnetic">Anfrage</a>
   </nav>
 </header>
 
-<main id="top">
+<main id="main">
 
-  <section class="hero">
-    <div class="hero-text">
-      <p class="eyebrow">Neu gebaut · Demo-Projekt</p>
-      <h1>Immobilien <em>zum Durchgehen.</em></h1>
-      <p class="lead">Ein Foto zeigt eine Ecke, ein 3D-Rundgang zeigt das ganze Zuhause. Interessenten gehen Raum für Raum durch, von jedem Ort der Welt, zu jeder Uhrzeit.</p>
-      <p>
-        <a class="btn" href="#kontakt">Anfrage stellen</a>
-        <a class="btn ghost" href="#vorher-nachher">Unterschied ansehen</a>
-      </p>
+<!-- HERO -->
+<section class="hero" id="top">
+  <canvas id="cloud" aria-hidden="true"></canvas>
+  <div class="hero-vignette" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="eyebrow"><span class="dot"></span> 3D-Rundgänge · Immobilienfotografie · Erftstadt</p>
+    <h1>Gehen Sie hinein,<br><span class="grad">bevor Sie hingehen.</span></h1>
+    <p class="hero-lead">Wir scannen Räume mit Matterport und Leica BLK und machen sie online begehbar. Für Käufer, Mieter und Gäste, rund um die Uhr, mit einem einzigen Link.</p>
+    <div class="hero-cta">
+      <a class="btn magnetic" href="#erleben">Rundgang erleben</a>
+      <a class="btn ghost magnetic" href="#konfigurator">Projekt planen</a>
     </div>
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 420 340" role="img">
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#cfe8d8"/><stop offset="1" stop-color="#f6f1e4"/>
-          </linearGradient>
-        </defs>
-        <rect width="420" height="340" rx="22" fill="url(#sky)"/>
-        <circle class="sun" cx="330" cy="80" r="34" fill="#f2c14e"/>
-        <path d="M0 270 Q110 230 210 262 T420 250 V340 H0Z" fill="#8fc7a2"/>
-        <path d="M0 300 Q140 270 260 296 T420 290 V340 H0Z" fill="#267a48"/>
-        <g>
-          <path d="M92 190 210 98l118 92v100H92z" fill="#fffaf0" stroke="#1d3b2a" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M78 196 210 88l132 108" fill="none" stroke="#a4452c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="188" y="226" width="44" height="64" rx="4" fill="#a4452c"/>
-          <rect x="116" y="204" width="48" height="42" rx="3" fill="#cfe8f2" stroke="#1d3b2a" stroke-width="3"/>
-          <rect x="256" y="204" width="48" height="42" rx="3" fill="#cfe8f2" stroke="#1d3b2a" stroke-width="3"/>
-          <line x1="140" y1="204" x2="140" y2="246" stroke="#1d3b2a" stroke-width="3"/>
-          <line x1="280" y1="204" x2="280" y2="246" stroke="#1d3b2a" stroke-width="3"/>
-        </g>
-      </svg>
-    </div>
-  </section>
+  </div>
+  <div class="hud" aria-hidden="true">
+    <div class="hud-row"><span>SCAN</span><b id="hudPct">000</b><span>%</span></div>
+    <div class="hud-bar"><i id="hudBar"></i></div>
+    <div class="hud-row small"><span>PUNKTE</span><b id="hudPts">0</b></div>
+  </div>
+  <a class="scroll-hint" href="#erleben" aria-label="Nach unten scrollen"><span></span></a>
+</section>
 
-  <section id="leistungen" class="block">
-    <h2>Was ein Rundgang kann</h2>
-    <p class="sub">Drei Gründe, warum aus einem Inserat ein Besuch im Kopf wird.</p>
-    <div class="cards">
-      <article class="card">
-        <span class="icon" aria-hidden="true">◎</span>
-        <h3>Begehbar</h3>
-        <p>Interessenten bewegen sich selbst durch alle Räume, drehen den Blick und gehen von Punkt zu Punkt, statt auf ausgewählte Bilder zu warten.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">▢</span>
-        <h3>Maßstäblich</h3>
-        <p>Aus dem Scan entstehen Grundriss und Abmessungen. Wer sich die Wohnung ansieht, versteht auch, ob das Sofa passt.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">✦</span>
-        <h3>Immer erreichbar</h3>
-        <p>Ein Link genügt. Der Rundgang steht im Exposé, auf dem Portal oder auf der eigenen Seite, rund um die Uhr, ohne Besichtigungstermin.</p>
-      </article>
-    </div>
-  </section>
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Matterport</span><span>Leica BLK</span><span>Immobilienfotografie</span><span>Architekturfotografie</span><span>Digitaler Zwilling</span><span>3D-Rundgang</span><span>Erftstadt</span>
+    <span>Matterport</span><span>Leica BLK</span><span>Immobilienfotografie</span><span>Architekturfotografie</span><span>Digitaler Zwilling</span><span>3D-Rundgang</span><span>Erftstadt</span>
+  </div>
+</div>
 
-  <section id="vorher-nachher" class="block alt">
-    <h2>Exposé ohne und mit Rundgang</h2>
-    <p class="sub">Ziehe den Regler. Links ein Exposé mit wenigen, dunklen Fotos, rechts derselbe Raum als heller, begehbarer Rundgang.</p>
-    <div class="compare" id="compare">
-      <svg class="room room-after" viewBox="0 0 800 450" aria-hidden="true">
-        <rect width="800" height="450" fill="#fbf4e3"/>
-        <rect y="330" width="800" height="120" fill="#d8b98a"/>
-        <rect x="90" y="60" width="210" height="220" rx="4" fill="#cfe8f2" stroke="#fff" stroke-width="10"/>
-        <line x1="195" y1="60" x2="195" y2="280" stroke="#fff" stroke-width="8"/>
-        <polygon points="90,330 300,330 360,450 40,450" fill="#fff6c8" opacity=".7"/>
-        <rect x="420" y="240" width="300" height="100" rx="14" fill="#267a48"/>
-        <rect x="420" y="210" width="300" height="50" rx="14" fill="#2f9159"/>
-        <rect x="560" y="120" width="120" height="80" fill="#f2c14e" stroke="#1d3b2a" stroke-width="3"/>
-        <circle cx="660" cy="395" r="22" fill="#a4452c"/>
-        <path d="M660 373v-30M660 360c-14-6-18-18-14-28 14 4 18 16 14 28zM660 356c14-6 18-18 14-28-14 4-18 16-14 28z" fill="#267a48" stroke="#1d3b2a" stroke-width="2"/>
-      </svg>
-      <div class="room-before-wrap" id="beforeWrap">
-        <svg class="room room-before" viewBox="0 0 800 450" aria-hidden="true">
-          <rect width="800" height="450" fill="#8a8678"/>
-          <rect y="330" width="800" height="120" fill="#6e6a5e"/>
-          <rect x="90" y="60" width="210" height="220" rx="4" fill="#5f6a70" stroke="#777" stroke-width="10"/>
-          <line x1="195" y1="60" x2="195" y2="280" stroke="#777" stroke-width="8"/>
-          <rect x="420" y="250" width="300" height="90" rx="10" fill="#555"/>
-          <rect x="400" y="300" width="70" height="60" fill="#7b5e3d"/>
-          <rect x="520" y="330" width="120" height="70" fill="#7b5e3d"/>
-          <rect x="240" y="340" width="90" height="70" fill="#9a8d6a"/>
-          <rect x="650" y="360" width="60" height="50" fill="#7b5e3d"/>
+<!-- ZAHLEN -->
+<section class="stats">
+  <div class="stat reveal"><b data-count="24">0</b><small>Stunden täglich besichtigbar</small></div>
+  <div class="stat reveal"><b data-count="1">0</b><small>Link für Exposé, Portal und Website</small></div>
+  <div class="stat reveal"><b data-count="2">0</b><small>Aufnahmesysteme: Matterport und Leica BLK</small></div>
+  <div class="stat reveal"><b data-count="360">0</b><small>Grad Rundumblick in jedem Raum</small></div>
+</section>
+
+<!-- ERLEBEN -->
+<section class="block" id="erleben">
+  <div class="head reveal">
+    <p class="kicker">01 · Erleben</p>
+    <h2>Erklären Sie nichts. <span class="grad">Lassen Sie gehen.</span></h2>
+    <p class="sub">Zwei echte Rundgänge von immbild. Starten Sie einen, drehen Sie sich um, gehen Sie durch die Räume.</p>
+  </div>
+
+  <div class="viewer reveal" id="viewer">
+    <div class="viewer-tabs" role="tablist" aria-label="Rundgänge">
+      <button role="tab" aria-selected="true" class="vt active" data-id="NPQSFQNfjHp" data-title="Monteurhaus Euskirchen" data-kind="Unterkunft · Vermietung">
+        <b>Monteurhaus Euskirchen</b><small>Unterkunft · Vermietung</small>
+      </button>
+      <button role="tab" aria-selected="false" class="vt" data-id="sFFNBCnXWuj" data-title="Objekt Herrig" data-kind="Wohnobjekt mit Außenbereich">
+        <b>Objekt Herrig</b><small>Wohnobjekt mit Außenbereich</small>
+      </button>
+    </div>
+    <div class="viewer-stage" id="stage">
+      <div class="poster" id="poster">
+        <svg viewBox="0 0 800 450" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14181d"/><stop offset="1" stop-color="#07080a"/></linearGradient>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#f1d252" stroke-opacity=".08"/></pattern>
+          </defs>
+          <rect width="800" height="450" fill="url(#pg)"/><rect width="800" height="450" fill="url(#grid)"/>
+          <g class="dollhouse" fill="none" stroke="#f1d252" stroke-width="2" stroke-linejoin="round">
+            <path d="M400 110 560 190 400 270 240 190Z" stroke-opacity=".9"/>
+            <path d="M240 190V280L400 360V270M560 190V280L400 360" stroke-opacity=".7"/>
+            <path d="M320 150 480 230M480 150 320 230" stroke-opacity=".3"/>
+            <path d="M400 190 480 230 400 270 320 230Z" stroke-opacity=".5"/>
+            <path d="M240 280 400 360 560 280" stroke-opacity=".3"/>
+          </g>
         </svg>
+        <div class="poster-ui">
+          <span class="chip live"><i></i> LIVE 3D</span>
+          <button class="play" id="play" aria-label="Rundgang starten"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+          <p class="poster-title" id="posterTitle">Monteurhaus Euskirchen</p>
+          <p class="poster-note">Mit dem Start wird der Rundgang von Matterport geladen. Dabei werden Daten an Matterport übertragen.</p>
+        </div>
       </div>
-      <div class="handle" id="handle" role="slider" tabindex="0" aria-label="Vorher-Nachher-Regler" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span></span></div>
-      <span class="tag left">nur Fotos</span><span class="tag right">mit Rundgang</span>
+      <iframe id="frame" title="3D-Rundgang" allow="fullscreen; xr-spatial-tracking; accelerometer; gyroscope" allowfullscreen loading="lazy" hidden></iframe>
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
     </div>
-  </section>
+    <p class="hint">Tipp: Im Rundgang können Sie zwischen Dollhouse-Ansicht, Grundriss und Begehung wechseln.</p>
+  </div>
+</section>
 
-  <section id="galerie" class="block">
-    <h2>Galerie</h2>
-    <p class="sub">Gezeichnete Beispiele für Objekte, die sich als Rundgang eignen. Wähle eine Objektart.</p>
-    <div class="filters" role="group" aria-label="Filter">
-      <button class="chip active" data-filter="alle">Alle</button>
-      <button class="chip" data-filter="wohnung">Wohnung</button>
-      <button class="chip" data-filter="haus">Haus</button>
-      <button class="chip" data-filter="gewerbe">Gewerbe</button>
+<!-- LEISTUNGEN -->
+<section class="block" id="leistungen">
+  <div class="head reveal">
+    <p class="kicker">02 · Leistungen</p>
+    <h2>Ein Objekt. <span class="grad">Alle Perspektiven.</span></h2>
+    <p class="sub">Von der klassischen Aufnahme für Portal und Exposé bis zum begehbaren digitalen Zwilling.</p>
+  </div>
+  <div class="bento">
+    <article class="tile big tilt reveal">
+      <span class="num">01</span>
+      <h3>Virtuelle 3D-Rundgänge</h3>
+      <p>Raum für Raum erfasst, millimetergenau zusammengesetzt und online begehbar. Mit Dollhouse-Ansicht und Grundriss. Der Rundgang lässt sich in Exposés, Portale und die eigene Website einbinden.</p>
+      <svg class="art" viewBox="0 0 200 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M100 14 170 50 100 86 30 50Z"/><path d="M30 50v34l70 34V86M170 50v34l-70 34"/><path d="M65 32 135 68M135 32 65 68" opacity=".35"/></g></svg>
+    </article>
+    <article class="tile tilt reveal">
+      <span class="num">02</span>
+      <h3>Immobilienfotografie</h3>
+      <p>Aufnahmen für Immobilienportale und Exposés mit Fachkameratechnik. Ruhig, hell, ehrlich.</p>
+    </article>
+    <article class="tile tilt reveal">
+      <span class="num">03</span>
+      <h3>Objekt- und Architekturfotografie</h3>
+      <p>Gebäude, Räume und Details für Präsentation, Dokumentation und Werbung.</p>
+    </article>
+    <article class="tile wide tilt reveal">
+      <span class="num">04</span>
+      <h3>Einbindung und Weitergabe</h3>
+      <p>Ein Link genügt: für Ihr Exposé, Ihr Portal, Ihre Website oder die Mail an Interessenten. Auf Anfrage unterstützen wir bei der Einbindung.</p>
+    </article>
+    <article class="tile tilt reveal">
+      <span class="num">05</span>
+      <h3>Grundriss und Maße</h3>
+      <p>Optional zum Rundgang dazubuchbar: Aus dem Matterport-Scan entstehen Grundrisse und Abmessungen Ihres Objekts.</p>
+    </article>
+  </div>
+</section>
+
+<!-- FÜR WEN -->
+<section class="block alt" id="fuer-wen">
+  <div class="head reveal">
+    <p class="kicker">03 · Für wen</p>
+    <h2>Wer profitiert <span class="grad">vom Rundgang?</span></h2>
+  </div>
+  <div class="who reveal">
+    <div class="who-tabs" role="tablist" aria-label="Zielgruppen">
+      <button role="tab" aria-selected="true" class="wt active" data-i="0">Makler</button>
+      <button role="tab" aria-selected="false" class="wt" data-i="1">Eigentümer</button>
+      <button role="tab" aria-selected="false" class="wt" data-i="2">Vermieter und Unterkünfte</button>
+      <button role="tab" aria-selected="false" class="wt" data-i="3">Gewerbe und Hotels</button>
+      <button role="tab" aria-selected="false" class="wt" data-i="4">Architekten</button>
     </div>
-    <div class="grid" id="grid">
-      <figure data-kind="wohnung" style="--c1:#cfe8d8;--c2:#267a48"><div class="shape s1"></div><figcaption>Altbau, 3 Zimmer<small>Wohnung</small></figcaption></figure>
-      <figure data-kind="haus" style="--c1:#f4dcc8;--c2:#a4452c"><div class="shape s2"></div><figcaption>Reihenhaus mit Garten<small>Haus</small></figcaption></figure>
-      <figure data-kind="gewerbe" style="--c1:#d6e0ee;--c2:#34507a"><div class="shape s3"></div><figcaption>Ladenfläche, Erdgeschoss<small>Gewerbe</small></figcaption></figure>
-      <figure data-kind="wohnung" style="--c1:#f6efc9;--c2:#b58b12"><div class="shape s2"></div><figcaption>Dachgeschoss, offen<small>Wohnung</small></figcaption></figure>
-      <figure data-kind="haus" style="--c1:#e2d6ee;--c2:#5d3c85"><div class="shape s1"></div><figcaption>Stadtvilla<small>Haus</small></figcaption></figure>
-      <figure data-kind="gewerbe" style="--c1:#d3ece9;--c2:#1f7a72"><div class="shape s3"></div><figcaption>Praxisräume<small>Gewerbe</small></figcaption></figure>
+    <div class="who-body" id="whoBody" aria-live="polite">
+      <h3 id="whoTitle"></h3>
+      <p id="whoText"></p>
+      <ul id="whoList"></ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="ablauf" class="block alt">
-    <h2>Ablauf in vier Schritten</h2>
-    <ol class="steps">
-      <li><b>Anfrage</b><span>Du beschreibst Objekt, Größe und Ziel.</span></li>
-      <li><b>Termin</b><span>Wir legen den Tag mit dem besten Licht fest.</span></li>
-      <li><b>Scan</b><span>Raum für Raum wird mit der 3D-Kamera erfasst.</span></li>
-      <li><b>Link</b><span>Der fertige Rundgang kommt als Link fürs Exposé.</span></li>
-    </ol>
-  </section>
+<!-- TECHNIK -->
+<section class="block" id="technik">
+  <div class="head reveal">
+    <p class="kicker">04 · Technik</p>
+    <h2>Zwei Systeme. <span class="grad">Ein Ergebnis.</span></h2>
+    <p class="sub">Je nach Objekt setzen wir die Kamera oder den Laserscanner ein. Gezeigt wird beides in einem Rundgang.</p>
+  </div>
+  <div class="tech">
+    <article class="device reveal">
+      <svg viewBox="0 0 220 260" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M110 150 60 250M110 150 160 250M110 150V250"/>
+          <rect x="82" y="40" width="56" height="110" rx="14" class="body"/>
+          <circle cx="110" cy="75" r="14"/><circle cx="110" cy="75" r="5" class="fill"/>
+          <circle cx="110" cy="115" r="14"/><circle cx="110" cy="115" r="5" class="fill"/>
+          <path d="M96 30h28" />
+        </g>
+        <g class="rings" fill="none" stroke="currentColor"><circle cx="110" cy="95" r="70"/><circle cx="110" cy="95" r="95"/></g>
+      </svg>
+      <h3>Matterport Pro2</h3>
+      <p>Das System für begehbare digitale Zwillinge. Schnell erfasst, intuitiv zu bedienen, mit Dollhouse-Ansicht.</p>
+      <ul><li>Ideal für Wohnungen, Häuser und Unterkünfte</li><li>Rundgang direkt im Browser, ohne App</li><li>Grundriss und Maße optional dazubuchbar</li></ul>
+    </article>
+    <article class="device reveal">
+      <svg viewBox="0 0 220 260" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M110 160 60 250M110 160 160 250M110 160V250"/>
+          <path d="M80 160V88a30 30 0 0 1 60 0v72Z" class="body"/>
+          <path d="M80 110h60M80 130h60" opacity=".5"/>
+          <path d="M94 70a16 16 0 0 1 32 0" />
+        </g>
+        <g class="rings" fill="none" stroke="currentColor"><ellipse cx="110" cy="100" rx="70" ry="24"/><ellipse cx="110" cy="100" rx="95" ry="34"/></g>
+      </svg>
+      <h3>Leica BLK360</h3>
+      <p>Der Laserscanner für höchste Detailtreue. Er misst Räume und Gebäude mit Präzision im Millimeterbereich, auch von oben.</p>
+      <ul><li>Für größere und komplexe Objekte</li><li>Aufnahmen vom Hochstativ aus der Vogelperspektive</li><li>Ergebnis verbindet sich mit dem Matterport-Rundgang</li></ul>
+    </article>
+    <article class="device reveal">
+      <svg viewBox="0 0 220 260" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="80" width="160" height="100" rx="14" class="body"/>
+          <circle cx="110" cy="130" r="34"/><circle cx="110" cy="130" r="20"/><circle cx="110" cy="130" r="6" class="fill"/>
+          <path d="M60 80l10-18h40l10 18"/><circle cx="165" cy="100" r="5"/>
+        </g>
+        <g class="rings" fill="none" stroke="currentColor"><circle cx="110" cy="130" r="78"/><circle cx="110" cy="130" r="100"/></g>
+      </svg>
+      <h3>Fachkamera</h3>
+      <p>Klassische Fotografie für Portale, Exposés und Architektur. Wenn ein einzelnes Bild mehr sagt als tausend Meter Rundgang.</p>
+      <ul><li>Perspektive und Licht unter Kontrolle</li><li>Aufnahmen für Print und Online</li><li>Kombinierbar mit dem Rundgang</li></ul>
+    </article>
+  </div>
+</section>
 
-  <section id="kontakt" class="block">
-    <h2>Anfrage</h2>
-    <p class="sub">Dies ist ein Demo-Formular. Es läuft über Netlify Forms.</p>
-    <form name="anfrage" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="form" id="form">
+<!-- VOGELPERSPEKTIVE -->
+<section class="block vogel" id="vogel">
+  <div class="vogel-grid">
+    <div class="head reveal">
+      <p class="kicker">Unsere Besonderheit</p>
+      <h2>Vogelperspektive. <span class="grad">Ganz ohne Drohne.</span></h2>
+      <p class="sub">Wir fotografieren und scannen mit dem Leica BLK360 vom Hochstativ aus. So erreichen wir Höhe, ohne zu fliegen.</p>
+      <ul class="ticks">
+        <li><b>Der Drohnen-Effekt:</b> Der Rundgang wirkt, als schwebe man über dem Haus.</li>
+        <li><b>3D-Daten von oben:</b> Dächer, Fassaden, Grundstück und Umfeld stehen als 3D-Daten bereit, mehr als ein Drohnenfoto liefern kann.</li>
+        <li><b>Ohne Drohnenflug:</b> Kein Flug, keine Auflagen und keine Genehmigungsfragen, die ein Drohneneinsatz mit sich bringt.</li>
+        <li><b>Verbunden mit Matterport:</b> Außenaufnahme und Innenrundgang bilden ein durchgehendes Modell.</li>
+      </ul>
+    </div>
+    <figure class="vogel-art reveal" aria-label="Skizze: Scanner auf Hochstativ blickt von oben auf ein Haus">
+      <svg viewBox="0 0 460 420" role="img">
+        <title>Hochstativ mit Scanner über einem Haus, Scanstrahlen fächern nach unten</title>
+        <defs>
+          <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5de0e6" stop-opacity=".55"/><stop offset="1" stop-color="#5de0e6" stop-opacity="0"/></linearGradient>
+        </defs>
+        <ellipse cx="230" cy="372" rx="200" ry="28" fill="none" stroke="#f1d252" stroke-opacity=".25"/>
+        <ellipse cx="230" cy="372" rx="140" ry="18" fill="none" stroke="#f1d252" stroke-opacity=".18"/>
+        <g class="v-house" fill="none" stroke="#f1d252" stroke-width="2" stroke-linejoin="round">
+          <path d="M150 360V300L230 240 310 300V360Z" fill="rgba(241,210,82,.06)"/>
+          <path d="M130 304 230 228 330 304"/>
+          <path d="M205 360v-42h50v42"/><rect x="164" y="316" width="28" height="22"/><rect x="268" y="316" width="28" height="22"/>
+        </g>
+        <path class="v-beam" d="M230 70 120 350H340Z" fill="url(#beam)"/>
+        <g class="v-lines" stroke="#5de0e6" stroke-opacity=".5" stroke-width="1.2">
+          <path d="M230 70 150 350M230 70 190 350M230 70 230 350M230 70 270 350M230 70 310 350"/>
+        </g>
+        <g fill="none" stroke="#f3f1ea" stroke-width="3" stroke-linecap="round">
+          <path d="M230 90 190 40 M230 90 270 40 M230 90V32" opacity="0"/>
+          <path d="M230 90 190 190M230 90 270 190M230 90 230 190" opacity=".0"/>
+          <path d="M205 72h50l-6-24h-38z" fill="#0d0f12"/>
+          <path d="M230 72V96"/>
+          <path d="M230 96 200 190M230 96 260 190M230 96 230 190" opacity="0"/>
+        </g>
+        <g stroke="#f3f1ea" stroke-width="3" stroke-linecap="round" fill="none">
+          <path d="M230 96 150 395M230 96 310 395M230 96V395" />
+        </g>
+        <circle cx="230" cy="62" r="16" fill="#0d0f12" stroke="#f1d252" stroke-width="3"/>
+        <circle class="v-dot" cx="230" cy="62" r="5" fill="#f1d252"/>
+        <g class="v-drone" opacity=".5" stroke="#9a9a94" stroke-width="2" fill="none" stroke-linecap="round">
+          <rect x="360" y="60" width="34" height="14" rx="5"/><path d="M356 58h-16M398 58h16M356 76h-16M398 76h16"/>
+          <path d="M338 46 416 90M416 46 338 90" stroke="#ff4b4b" stroke-width="3"/>
+        </g>
+        <text x="230" y="408" text-anchor="middle" fill="#9a9a94" font-size="14" font-family="ui-monospace,Menlo,monospace">Hochstativ statt Drohne</text>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<!-- ABLAUF -->
+<section class="block alt" id="ablauf">
+  <div class="head reveal">
+    <p class="kicker">05 · Ablauf</p>
+    <h2>Vom ersten Gespräch <span class="grad">zum fertigen Link.</span></h2>
+  </div>
+  <ol class="timeline" id="timeline">
+    <li class="reveal"><span class="n">1</span><div><h3>Anfrage</h3><p>Sie schildern Objekt, Lage und Ziel, gerne mit Fotos oder Plänen als Anhang.</p></div></li>
+    <li class="reveal"><span class="n">2</span><div><h3>Abstimmung</h3><p>Wir klären Umfang und Termin und besprechen, was im Objekt vorbereitet werden sollte.</p></div></li>
+    <li class="reveal"><span class="n">3</span><div><h3>Aufnahme vor Ort</h3><p>Wir erfassen alle Räume mit Matterport oder Leica BLK und fotografieren, wo es sinnvoll ist.</p></div></li>
+    <li class="reveal"><span class="n">4</span><div><h3>Aufbereitung</h3><p>Aus den Scans entsteht Ihr digitaler Zwilling, die Fotos werden bearbeitet und geprüft.</p></div></li>
+    <li class="reveal"><span class="n">5</span><div><h3>Ihr Link</h3><p>Sie erhalten den Rundgang als Link. Ab jetzt besichtigt Ihr Objekt sich selbst.</p></div></li>
+  </ol>
+</section>
+
+<!-- KONFIGURATOR -->
+<section class="block" id="konfigurator">
+  <div class="head reveal">
+    <p class="kicker">06 · Projekt planen</p>
+    <h2>Stellen Sie Ihr Projekt <span class="grad">in 30 Sekunden zusammen.</span></h2>
+    <p class="sub">Keine Preisliste, kein Formularwald. Sie wählen, wir melden uns mit einem passenden Angebot.</p>
+  </div>
+  <div class="config reveal">
+    <div class="cfg-col">
+      <h3>Objektart</h3>
+      <div class="pills" id="cfgType">
+        <button class="pill active" data-v="Wohnung">Wohnung</button>
+        <button class="pill" data-v="Haus">Haus</button>
+        <button class="pill" data-v="Unterkunft / Ferienobjekt">Unterkunft</button>
+        <button class="pill" data-v="Gewerbe / Büro">Gewerbe</button>
+        <button class="pill" data-v="Hotel / Gastronomie">Hotel</button>
+      </div>
+      <h3>Größe: <output id="cfgSizeOut">120 m²</output></h3>
+      <input type="range" id="cfgSize" min="20" max="1500" step="10" value="120" aria-label="Wohn- bzw. Nutzfläche in Quadratmetern">
+      <h3>Gewünscht</h3>
+      <div class="pills multi" id="cfgWants">
+        <button class="pill active" data-v="3D-Rundgang">3D-Rundgang</button>
+        <button class="pill" data-v="Immobilienfotos">Fotos</button>
+        <button class="pill" data-v="Grundriss und Maße">Grundriss</button>
+        <button class="pill" data-v="Architekturaufnahmen">Architektur</button>
+      </div>
+    </div>
+    <div class="cfg-col sum">
+      <h3>Ihre Anfrage</h3>
+      <p class="summary" id="cfgSummary"></p>
+      <a href="#kontakt" class="btn magnetic" id="cfgGo">Mit diesen Angaben anfragen</a>
+      <small>Unverbindlich. Wir antworten persönlich.</small>
+    </div>
+  </div>
+</section>
+
+<!-- ÜBER UNS -->
+<section class="block alt" id="ueber-uns">
+  <div class="about reveal">
+    <p class="kicker">07 · Wir</p>
+    <blockquote>„Unsere Mission ist es, die beste Lösung für Sie als Kunde bereitzustellen.“</blockquote>
+    <div class="people">
+      <div class="person"><span class="mono">AW</span><div><b>Alexander Werner</b><small>immbild.de</small></div></div>
+      <div class="person"><span class="mono">AK</span><div><b>Anne Krämer</b><small>immbild.de</small></div></div>
+    </div>
+    <p class="sub">Aus Erftstadt für Köln, Bonn, den Rhein-Erft-Kreis und die Eifel. Objekt-, Architektur- und Immobilienfotografie, dazu virtuelle Erlebnistouren, aus einer Hand.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="block" id="faq">
+  <div class="head reveal">
+    <p class="kicker">08 · Fragen</p>
+    <h2>Gut zu <span class="grad">wissen.</span></h2>
+  </div>
+  <div class="faq reveal">
+    <details><summary>Was ist ein virtueller 3D-Rundgang?</summary><p>Ein Rundgang ist ein digitaler Zwilling Ihres Objekts. Besucher bewegen sich selbst durch die Räume, drehen den Blick und wechseln zwischen Begehung, Dollhouse-Ansicht und Grundriss. Alles läuft im Browser.</p></details>
+    <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
+    <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
+    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
+    <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
+    <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
+  </div>
+</section>
+
+<!-- KONTAKT -->
+<section class="block contact" id="kontakt">
+  <div class="head reveal">
+    <p class="kicker">09 · Kontakt</p>
+    <h2>Lassen Sie uns <span class="grad">Ihr Objekt betreten.</span></h2>
+  </div>
+  <div class="contact-grid">
+    <form name="anfrage" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" class="form reveal" id="form">
       <input type="hidden" name="form-name" value="anfrage">
       <p hidden><label>Nicht ausfüllen: <input name="bot-field"></label></p>
-      <label>Name<input name="name" required autocomplete="name"></label>
-      <label>E-Mail<input type="email" name="email" required autocomplete="email"></label>
-      <label>Objektart
-        <select name="objekt">
-          <option>Wohnung</option><option>Haus</option><option>Gewerbe</option>
-        </select>
-      </label>
-      <label>Nachricht<textarea name="nachricht" rows="4"></textarea></label>
-      <button class="btn" type="submit">Absenden</button>
+      <div class="two">
+        <label>Name<input name="name" required autocomplete="name"></label>
+        <label>E-Mail<input type="email" name="email" required autocomplete="email"></label>
+      </div>
+      <div class="two">
+        <label>Telefon (optional)<input type="tel" name="telefon" autocomplete="tel"></label>
+        <label>Objektort (optional)<input name="ort" autocomplete="address-level2"></label>
+      </div>
+      <label>Nachricht<textarea name="nachricht" id="msgField" rows="6" placeholder="Was möchten Sie zeigen?"></textarea></label>
+      <label class="file">Anhänge (optional)<input type="file" name="anhang" multiple></label>
+      <label class="check"><input type="checkbox" name="datenschutz" required> <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzhinweise</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden.</span></label>
+      <button class="btn magnetic" type="submit">Anfrage senden</button>
       <p class="msg" id="msg" role="status"></p>
     </form>
-  </section>
+    <aside class="card-info reveal">
+      <h3>immbild.de</h3>
+      <p>Alexander Werner &amp; Anne Krämer<br>Lechenicher Straße 4<br>50374 Erftstadt</p>
+      <p><a href="tel:+4922354789201">+49 2235 4789201</a><br><a href="tel:+491636221719">+49 163 6221719</a></p>
+      <p><a href="mailto:bastian.a.werner@immbild.de">bastian.a.werner@immbild.de</a></p>
+      <hr>
+      <p class="mini">Einsatzgebiet: Erftstadt, Köln, Bonn, Rhein-Erft-Kreis, Euskirchen und Umgebung. Auf Anfrage auch weiter.</p>
+    </aside>
+  </div>
+</section>
 
 </main>
 
-<footer>
-  <p><b>immbild</b> · Übungsprojekt: neue Website mit HTML, CSS und JavaScript, über GitHub und Netlify veröffentlicht. Alle Inhalte sind Demo-Inhalte.</p>
+<footer class="site-footer">
+  <a class="logo" href="#top">imm<b>bild</b><i>.</i></a>
+  <p>Alexander Werner &amp; Anne Krämer · Lechenicher Straße 4 · 50374 Erftstadt</p>
+  <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="#top">Nach oben ↑</a></p>
 </footer>
 
 <script src="script.js"></script>

@@ -1,9 +1,12 @@
-# immbild
+# immbild.
 
-Neue, kleine Website (Demo-Projekt) über 3D-Rundgänge für Immobilien: reines HTML, CSS und JavaScript, ohne Build-Schritt.
+Neue Website für immbild.de (Alexander Werner & Anne Krämer, Erftstadt): virtuelle 3D-Rundgänge mit Matterport und Leica BLK sowie Immobilien-, Objekt- und Architekturfotografie.
 
-- `index.html`: Aufbau und Inhalt
-- `style.css`: Gestaltung
-- `script.js`: Menü, Vorher/Nachher-Regler, Galerie-Filter, Formular
+Reines HTML, CSS und JavaScript, ohne Build-Schritt, ohne externe Schriften oder Tracker.
+
+- `index.html`: Startseite (Hero mit Punktwolke, Rundgang-Viewer, Leistungen, Technik, Ablauf, Konfigurator, FAQ, Kontakt)
+- `style.css`, `script.js`: Gestaltung und Interaktion
+- `impressum.html`, `datenschutz.html`: Entwürfe, vor Veröffentlichung rechtlich prüfen
+- `danke.html`: Bestätigung nach dem Formular
 
 Veröffentlicht über GitHub und Netlify.
