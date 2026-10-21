@@ -377,10 +377,13 @@ nav.addEventListener('click', e => {
       // Nordpfeil (nur, wenn die Richtung bekannt ist)
       if (draw.north && bar) {
         const ang = draw.north.angle * Math.PI / 180, bx = bar.o[0] + bar.len + 2.2, by = bar.o[1];
-        const a = P(bx, by, F), b = P(bx + Math.sin(ang) * 2, by + Math.cos(ang) * 2, F);
+        const a = P(bx, by, F), b = P(bx + Math.sin(ang) * 2.6, by + Math.cos(ang) * 2.6, F);
         ctx.globalAlpha = rPlan; ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, 1.6 * u);
         ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
-        circle(a[0], a[1], 5 * u, ink); text('N', b[0], b[1] - 8 * u, ink, 11, '800');
+        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, hs = 7 * u;
+        ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(b[0] - ux * hs * 1.8 - uy * hs * 0.8, b[1] - uy * hs * 1.8 + ux * hs * 0.8);
+        ctx.lineTo(b[0] - ux * hs * 1.8 + uy * hs * 0.8, b[1] - uy * hs * 1.8 - ux * hs * 0.8); ctx.closePath(); ctx.fillStyle = ink; ctx.fill();
+        circle(a[0], a[1], 4 * u, ink); text('N', b[0] + ux * 11 * u, b[1] + uy * 11 * u, ink, 11, '800');
       }
     }
 
