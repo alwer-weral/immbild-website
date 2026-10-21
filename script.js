@@ -313,8 +313,7 @@ nav.addEventListener('click', e => {
     if (rRoof > 0) {
       // durchsichtige Dachflächen: jede Höhenstufe ein dünner Schleier, zum First hin wird es dichter
       for (const g of draw.roofsurf) {
-        const fade = clamp01((zc - g.z + 0.4) / 1.6);
-        if (fade <= 0) continue;
+        const fade = 0.55 + 0.45 * clamp01((zc - g.z + 0.4) / 1.6);   // beim Zoomen bleibt ein zarter Dachschleier stehen
         const n = Math.ceil(rRoof * g.runs.length);
         ctx.beginPath();
         for (let i = 0; i < n; i++) {
@@ -326,8 +325,7 @@ nav.addEventListener('click', e => {
       const nR = draw.roofpoly.length, shownR = rRoof * nR;
       for (let i = 0; i < nR && i < shownR; i++) {
         const r = draw.roofpoly[i];
-        const fade = clamp01((zc - r.z + 0.4) / 1.6);
-        if (fade <= 0) continue;
+        const fade = 0.5 + 0.5 * clamp01((zc - r.z + 0.4) / 1.6);     // Dachlinien: nie ganz weg, nur durchsichtiger
         const frac = Math.min(1, shownR - i), last = Math.max(1, Math.ceil((r.pts.length - 1) * frac));
         ctx.beginPath();
         let p = P(r.pts[0][0], r.pts[0][1], r.z); ctx.moveTo(p[0], p[1]);
