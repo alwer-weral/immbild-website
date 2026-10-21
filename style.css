@@ -399,3 +399,10 @@ html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look
 .view-note { position: absolute; right: 0; bottom: 52px; width: 300px; margin: 0; text-align: right; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .72rem; line-height: 1.4; color: var(--muted); pointer-events: none; }
 .view-note.swap { animation: swap .6s var(--ease); }
 @media (max-width: 760px) { .view-note { display: none; } }
+
+/* Real Estate: dichte Farbpunkte über der Zeichnung, mit Überblendung */
+#cloud { transition: opacity .7s; }
+#realcanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity .7s; pointer-events: none; }
+.hero.real #realcanvas { opacity: 1; }
+.hero.real #cloud { opacity: 0; }
+@media (max-width: 760px) { .cloud-ctrl { left: 1rem; right: 1rem; justify-content: flex-end; flex-wrap: wrap; gap: .4rem; } .cloud-ctrl .view-switch { margin-right: 0; } }

@@ -423,21 +423,122 @@ nav.addEventListener('click', e => {
     ctx.restore();
   }
 
-  /* Schalter Scan | Zeichnung */
+  /* Real Estate: dichte, undurchsichtige Farbpunkte aus dem Scan, mit der Grafikkarte gezeichnet (WebGL) */
+  const glCanvas = $('#realcanvas');
+  let gl = null, glProg = null, glPos = null, glCol = null, glCount = 0, glLoading = false, showReal = false;
+  const GL_SPACING = 0.07;     // Abstand der Punkte in Metern (aus dem Export)
+  const VS = `
+    attribute vec3 aPos; attribute vec3 aCol;
+    uniform vec2 uView; uniform vec4 uCam; uniform vec4 uRot; uniform vec3 uMisc; uniform vec2 uEll;
+    varying vec3 vCol; varying float vFade;
+    void main() {
+      vec3 p = aPos * 0.01;
+      float z = p.z - uMisc.x;
+      float x1 = p.x * uRot.x - p.y * uRot.y;
+      float y1 = p.x * uRot.y + p.y * uRot.x;
+      float up = z * uRot.z + y1 * uRot.w;
+      float depth = y1 * uRot.z - z * uRot.w;
+      float f = uCam.w / (uCam.w + depth);
+      float px = uCam.x + x1 * uCam.z * f;
+      float py = uCam.y - up * uCam.z * f;
+      gl_Position = vec4(px / uView.x * 2.0 - 1.0, 1.0 - py / uView.y * 2.0, clamp((depth + 60.0) / 120.0, 0.0, 1.0) * 2.0 - 1.0, 1.0);
+      gl_PointSize = clamp(uMisc.y * uCam.z * f * 1.7, 1.5, 14.0);
+      float rr = sqrt((p.x / uEll.x) * (p.x / uEll.x) + (p.y / uEll.y) * (p.y / uEll.y));
+      vFade = clamp((1.0 - rr) * 3.2, 0.0, 1.0);
+      vCol = aCol * uMisc.z;
+    }`;
+  const FS = `
+    precision mediump float;
+    varying vec3 vCol; varying float vFade;
+    void main() {
+      vec2 d = gl_PointCoord - 0.5;
+      if (dot(d, d) > 0.25) discard;
+      float h = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+      if (vFade < h) discard;
+      gl_FragColor = vec4(vCol, 1.0);
+    }`;
+  function initGL() {
+    try {
+      gl = glCanvas.getContext('webgl', { alpha: true, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: false });
+      if (!gl) return false;
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+      glProg = gl.createProgram();
+      gl.attachShader(glProg, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(glProg, sh(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(glProg);
+      if (!gl.getProgramParameter(glProg, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(glProg));
+      return true;
+    } catch (err) { gl = null; return false; }
+  }
+  async function loadRealGL() {
+    if (glCount) return true;
+    if (glLoading) return false;
+    glLoading = true;
+    try {
+      const res = await fetch('real.bin');
+      if (!res.ok) throw new Error(res.status);
+      const dv = new DataView(await res.arrayBuffer());
+      const total = dv.getUint32(0, true);
+      const n = innerWidth < 760 ? Math.floor(total * 0.5) : total;    // Reihenfolge in der Datei ist gemischt, also gleichmäßig ausgedünnt
+      const pos = new Int16Array(n * 3), col = new Uint8Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        const o = 4 + i * 9;
+        pos[i * 3] = dv.getInt16(o, true); pos[i * 3 + 1] = dv.getInt16(o + 2, true); pos[i * 3 + 2] = dv.getInt16(o + 4, true);
+        col[i * 3] = dv.getUint8(o + 6); col[i * 3 + 1] = dv.getUint8(o + 7); col[i * 3 + 2] = dv.getUint8(o + 8);
+      }
+      glPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, glPos); gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
+      glCol = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, glCol); gl.bufferData(gl.ARRAY_BUFFER, col, gl.STATIC_DRAW);
+      glCount = n;
+      return true;
+    } catch (err) { glLoading = false; return false; }
+  }
+  function drawReal() {
+    const w = canvas.width, h = canvas.height;
+    if (glCanvas.width !== w || glCanvas.height !== h) { glCanvas.width = w; glCanvas.height = h; }
+    gl.viewport(0, 0, w, h);
+    gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+    gl.useProgram(glProg);
+    const u = n => gl.getUniformLocation(glProg, n);
+    gl.uniform2f(u('uView'), w, h);
+    gl.uniform4f(u('uCam'), V.cx, V.cyy, V.scale, camZ);
+    gl.uniform4f(u('uRot'), V.cy, V.sy, V.cp, V.sp);
+    gl.uniform3f(u('uMisc'), zMid, GL_SPACING, 1.45);
+    gl.uniform2f(u('uEll'), EA, EB);
+    const a = gl.getAttribLocation(glProg, 'aPos'), b = gl.getAttribLocation(glProg, 'aCol');
+    gl.bindBuffer(gl.ARRAY_BUFFER, glPos); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 3, gl.SHORT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, glCol); gl.enableVertexAttribArray(b); gl.vertexAttribPointer(b, 3, gl.UNSIGNED_BYTE, true, 0, 0);
+    gl.drawArrays(gl.POINTS, 0, glCount);
+  }
+  const realBtn = $('.view-switch [data-view="real"]');
+  if (!initGL() && realBtn) realBtn.hidden = true;     // ohne WebGL gibt es die Ansicht nicht
+
+  /* Schalter Punktwolke | Zeichnung | Real Estate */
   const viewBtns = $$('.view-switch button');
-  viewBtns.forEach(b => b.addEventListener('click', () => {
-    morphAuto = false; mpTarget = b.dataset.view === 'zeichnung' ? 1 : 0; used();
+  const hero2 = hero;
+  viewBtns.forEach(b => b.addEventListener('click', async () => {
+    const v = b.dataset.view;
+    morphAuto = false; used();
+    if (v === 'real') {
+      const note = document.getElementById('viewNote');
+      if (!glCount && note) note.textContent = 'Real Estate wird geladen …';
+      if (!(await loadRealGL())) { if (note) note.textContent = 'Real Estate ist hier gerade nicht verfügbar.'; return; }
+      showReal = true; hero2.classList.add('real'); lastView = '';
+      return;
+    }
+    showReal = false; hero2.classList.remove('real');
+    mpTarget = v === 'zeichnung' ? 1 : 0;
     if (mpTarget === 1) loadDrawing();
+    lastView = '';
   }));
   let lastView = '';
   function syncView() {
-    const v = mpTarget === 1 ? 'zeichnung' : 'scan';
+    const v = showReal ? 'real' : (mpTarget === 1 ? 'zeichnung' : 'scan');
     if (v === lastView) return; lastView = v;
     viewBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
     const note = document.getElementById('viewNote');
     if (note) {
       note.classList.remove('swap'); void note.offsetWidth; note.classList.add('swap');
-      note.textContent = v === 'scan' ? 'Jeder Punkt ist eine Laser-Messung. Millionen davon ergeben das Modell.' : 'Aus den Messpunkten entsteht der Plan: Wände, Dach und Maße.';
+      note.textContent = v === 'scan' ? 'Jeder Punkt ist eine Laser-Messung. Millionen davon ergeben das Modell.' : v === 'zeichnung' ? 'Aus den Messpunkten entsteht der Plan: Wände, Dach und Maße.' : 'So sieht es von oben aus: echte Farben aus dem Scan, nichts durchsichtig.';
     }
   }
 
@@ -457,7 +558,7 @@ nav.addEventListener('click', e => {
     zoom += (zoomT - zoom) * 0.22;
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
-    const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
+    const pitch = Math.max(0.3, Math.min(1.5, (showReal ? 0.92 : (real ? 1.08 : 0.5)) + dragPitch + my * 0.08 - scrollP * 0.25));
     const look = document.documentElement.dataset.look === 'blaupause' ? 'blaupause' : 'papier';
     const paper = look === 'papier';
     if (real && !draw) loadDrawing();
@@ -472,6 +573,8 @@ nav.addEventListener('click', e => {
       cw: canvas.width, ch: canvas.height, rs, wide, real, paper, blue: !paper, mp
     });
     const edge = -half + sweep * 2 * half;
+
+    if (showReal && glCount) { drawReal(); syncView(); return; }    // Real Estate: nur die dichte Ansicht zeichnen
 
     // Überblick: etwa 45 % der Punkte; beim Heranzoomen kommen die übrigen dazu
     const blend = dichte === 'voll' ? 1 : dichte === 'grob' ? 0 : Math.max(0, Math.min(1, (zoom - 1) / 0.8));
