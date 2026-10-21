@@ -497,7 +497,7 @@ form.addEventListener('submit', async e => {
 /* ---------- Darstellung: Papier oder Nacht ---------- */
 (function look() {
   const root = document.documentElement;
-  const btns = $$('.look button');
+  const btns = $$('button[data-look]');   // nur der Schalter Papier | Blaupause, nicht Scan | Zeichnung
   const themeMeta = $('meta[name="theme-color"]');
   function apply(mode) {
     root.dataset.look = mode === 'blaupause' ? 'blaupause' : 'papier';
