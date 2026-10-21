@@ -379,3 +379,9 @@ html[data-look="papier"] .site-footer .logo, html[data-look="papier"] .site-foot
   html[data-look="papier"] .titleblock div { border-bottom: 1px solid var(--ink); }
   html[data-look="papier"] nav { background: rgba(var(--bg-rgb), .98); }
 }
+
+/* Schalter Scan | Zeichnung im Hero */
+.cloud-ctrl .view-switch { margin-right: .4rem; background: rgba(var(--bg-rgb), .82); }
+.cloud-ctrl .view-switch button { width: auto; height: auto; border-radius: 999px; font-size: .78rem; padding: .32rem .75rem; }
+.cloud-ctrl .view-switch button:hover { transform: none; }
+html[data-look="papier"] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }

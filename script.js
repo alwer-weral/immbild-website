@@ -133,6 +133,7 @@ nav.addEventListener('click', e => {
 
   /* Innenleben: wird nachgeladen, sobald man zoomt (oder auf großen Bildschirmen nach dem Scan-Aufbau) */
   let inner = null, innerLoading = false;
+  let mp = 0, mpTarget = 0, morphAuto = true, morphWait = 0;   // Verwandlung Scan (0) -> Zeichnung (1)
   async function loadInner() {
     if (inner || innerLoading) return;
     innerLoading = true;
@@ -150,6 +151,36 @@ nav.addEventListener('click', e => {
       }
       inner = { n, X, Y, Z, C, spacing: 0.09 * (total / n) ** 0.5 };
     } catch (err) { innerLoading = false; }
+  }
+
+  /* Zeichnung: Wände, Dachhöhenlinien und Maße aus echten Scan-Daten (zeichnung.json) */
+  let draw = null, drawLoading = false;
+  async function loadDrawing() {
+    if (draw || drawLoading) return;
+    drawLoading = true;
+    try {
+      const res = await fetch('zeichnung.json');
+      if (!res.ok) throw new Error(res.status);
+      const j = await res.json();
+      const F = j.floor, T = j.top;
+      let seed = 7; const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647 - 0.5;
+      const walls = [];
+      const wob = (a, b) => {          // Linie in kleine Stücke teilen, jedes Stück leicht wackeln lassen (wie von Hand gezeichnet)
+        const L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), n = Math.max(1, Math.round(L / 0.8)), pts = [];
+        for (let i = 0; i <= n; i++) {
+          const u = i / n, e = (i === 0 || i === n) ? 0.4 : 1;
+          pts.push([a[0] + (b[0] - a[0]) * u + rand() * 0.06 * e, a[1] + (b[1] - a[1]) * u + rand() * 0.06 * e, a[2] + (b[2] - a[2]) * u + rand() * 0.04 * e]);
+        }
+        return pts;
+      };
+      j.walls.sort((p, q) => Math.min(p[0], p[2]) - Math.min(q[0], q[2]));
+      for (const s of j.walls) {
+        walls.push(wob([s[0], s[1], F], [s[2], s[3], F]), wob([s[0], s[1], T], [s[2], s[3], T]));
+        walls.push([[s[0], s[1], F], [s[0], s[1], T]], [[s[2], s[3], F], [s[2], s[3], T]]);
+      }
+      j.roof.sort((p, q) => Math.min(p[0], p[3]) - Math.min(q[0], q[3]));
+      draw = { walls, roof: j.roof, dims: j.dims };
+    } catch (err) { drawLoading = false; }
   }
 
   const V = {};   // Kamera und Maße des aktuellen Bildes
@@ -184,7 +215,11 @@ nav.addEventListener('click', e => {
         } else {
           r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
         }
-        a = fade * cut * o.alpha * 235;
+        if (V.mp > 0) {   // Verwandlung: Farben verblassen zu Graphit, die Wolke tritt zurück
+          const lum = r * 0.3 + g * 0.59 + b * 0.11, k = V.mp * 0.85;
+          r += (lum - r) * k; g += (lum - g) * k; b += (lum - b) * k;
+        }
+        a = fade * cut * o.alpha * (1 - V.mp * (o.inner ? 0.6 : (z < 0.75 || z > 2.7 ? 0.94 : 0.8))) * 235;
         if (a < 6) continue;
         s = o.inner ? c.spacing * scale * f * 1.05 : (wide ? 3 : 1.9) * (V.paper ? 1.3 : 1) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * V.blend : 1) * f * rs;
       }
@@ -193,6 +228,73 @@ nav.addEventListener('click', e => {
       for (let oy = 0; oy < s; oy++) { const row = (py + oy) * cw + px; for (let ox = 0; ox < s; ox++) buf32[row + ox] = col; }
     }
     return shown;
+  }
+
+  function drawLines(zc, paper) {
+    const { cx, cyy, scale, cy, sy, cp, sp, rs } = V;
+    const P = (x, y, z) => {
+      const x1 = x * cy - y * sy, y1 = x * sy + y * cy, zz = z - zMid;
+      const up = zz * cp + y1 * sp, depth = y1 * cp - zz * sp, f = camZ / (camZ + depth);
+      return [cx + x1 * scale * f, cyy - up * scale * f];
+    };
+    const ink = paper ? '#14171c' : '#ece8dc', accent = paper ? '#d92b22' : '#f1d252', halo = paper ? '#f3f0e6' : '#07080a';
+    const rWalls = Math.min(1, mp / 0.5), rRoof = Math.max(0, Math.min(1, (mp - 0.3) / 0.5)), rDims = Math.max(0, (mp - 0.78) / 0.22);
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // Wände (Grundriss und Wandhöhe), zeichnen sich von links nach rechts
+    const nW = draw.walls.length, shownW = rWalls * nW;
+    ctx.beginPath();
+    for (let i = 0; i < nW && i < shownW; i++) {
+      const pts = draw.walls[i], frac = Math.min(1, shownW - i), last = Math.max(1, Math.ceil((pts.length - 1) * frac));
+      let p = P(pts[0][0], pts[0][1], pts[0][2]); ctx.moveTo(p[0], p[1]);
+      for (let k = 1; k <= last && k < pts.length; k++) { p = P(pts[k][0], pts[k][1], pts[k][2]); ctx.lineTo(p[0], p[1]); }
+    }
+    ctx.strokeStyle = ink; ctx.globalAlpha = 0.95; ctx.lineWidth = Math.max(1, 2.0 * rs); ctx.stroke();
+    // Dach als Höhenlinien; sie lösen sich beim Hineinzoomen von oben nach unten auf
+    if (rRoof > 0) {
+      const nR = draw.roof.length, shownR = rRoof * nR;
+      ctx.beginPath();
+      for (let i = 0; i < nR && i < shownR; i++) {
+        const s = draw.roof[i];
+        if (s[2] > zc) continue;
+        const a = P(s[0], s[1], s[2]), b = P(s[3], s[4], s[5]);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      }
+      ctx.strokeStyle = ink; ctx.globalAlpha = 0.9 * Math.min(1, Math.max(0, (zc - 3.6) / 2)); ctx.lineWidth = Math.max(1, 1.5 * rs); ctx.stroke();
+    }
+    // Maßlinien mit Zahlen
+    if (rDims > 0) {
+      ctx.globalAlpha = rDims; ctx.strokeStyle = accent; ctx.fillStyle = accent; ctx.lineWidth = Math.max(1, 1.3 * rs);
+      ctx.font = '600 ' + Math.round(V.wide ? 12 * rs + 2 : 8.5 * rs + 1) + 'px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+      ctx.beginPath();
+      for (const d of draw.dims) {
+        const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L * 6 * rs, ny = dx / L * 6 * rs;
+        ctx.moveTo(a[0] - nx, a[1] - ny); ctx.lineTo(a[0] + nx, a[1] + ny);
+        ctx.moveTo(b[0] - nx, b[1] - ny); ctx.lineTo(b[0] + nx, b[1] + ny);
+      }
+      ctx.stroke();
+      for (const d of draw.dims) {
+        const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
+        const mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2 - 7 * rs, label = 'ca. ' + d.label;
+        ctx.lineWidth = 4 * rs; ctx.strokeStyle = halo; ctx.strokeText(label, mx2, my2);
+        ctx.fillText(label, mx2, my2);
+      }
+    }
+    ctx.restore();
+  }
+
+  /* Schalter Scan | Zeichnung */
+  const viewBtns = $$('.view-switch button');
+  viewBtns.forEach(b => b.addEventListener('click', () => {
+    morphAuto = false; mpTarget = b.dataset.view === 'zeichnung' ? 1 : 0; used();
+    if (mpTarget === 1) loadDrawing();
+  }));
+  let lastView = '';
+  function syncView() {
+    const v = mpTarget === 1 ? 'zeichnung' : 'scan';
+    if (v === lastView) return; lastView = v;
+    viewBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
   }
 
   function frame(t) {
@@ -213,12 +315,16 @@ nav.addEventListener('click', e => {
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
     const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
     const paper = document.documentElement.dataset.look === 'papier';
+    if (real && !draw) loadDrawing();
+    if (sweep >= 1 && morphAuto && mpTarget === 0 && draw && !reduceMotion) { if (!morphWait) morphWait = t; if (t - morphWait > 1200) mpTarget = 1; }
+    mp += Math.max(-1, Math.min(1, (mpTarget - mp) * 4)) * dt / 3800;
+    mp = Math.max(0, Math.min(1, mp));
     const wide = W > 900;
     Object.assign(V, {
       cx: (wide ? W * 0.71 : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
       scale: Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom,
       cy: Math.cos(yw), sy: Math.sin(yw), cp: Math.cos(pitch), sp: Math.sin(pitch),
-      cw: canvas.width, ch: canvas.height, rs, wide, real, paper
+      cw: canvas.width, ch: canvas.height, rs, wide, real, paper, mp
     });
     const edge = -half + sweep * 2 * half;
 
@@ -234,6 +340,8 @@ nav.addEventListener('click', e => {
     const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: paper ? 0.3 : (real ? 1.7 : 1), inner: false });
     if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: paper ? 0.42 : 1.3, inner: true });
     ctx.putImageData(img, 0, 0);
+    if (draw && mp > 0.001) drawLines(zc, paper);
+    syncView();
     if (sweep < 1 || (++hudTick % 15 === 0)) {
       hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
       hudBar.style.width = sweep * 100 + '%';
