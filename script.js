@@ -174,15 +174,19 @@ nav.addEventListener('click', e => {
       if (px < 0 || py < 0 || px >= cw - 4 || py >= ch - 4) continue;
       const laser = !o.inner && o.edge - x < 0.6;
       let r, g, b, a, s;
-      if (laser) { r = 93; g = 224; b = 230; a = 255; s = 3.6 * f * rs; }
+      if (laser) { if (V.paper) { r = 217; g = 43; b = 34; } else { r = 93; g = 224; b = 230; } a = 255; s = 3.6 * f * rs; }
       else {
         const rr = Math.sqrt((x / EA) * (x / EA) + (y / EB) * (y / EB));
         const fade = o.inner ? 1 : (real ? Math.max(0, Math.min(1, (1 - rr) * 3.2)) : 1);
-        const shade = Math.max(0.5, Math.min(1.15, 0.62 + (f - 0.85) * 1.5)) * o.gain;
-        r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
+        const shade = (V.paper ? 1 : Math.max(0.5, Math.min(1.15, 0.62 + (f - 0.85) * 1.5))) * o.gain;
+        if (V.paper) {   // Tinte: Mitteltöne werden dunkel, Weiß bleibt ein heller Graphit-Ton
+          r = 150 * Math.pow(C[i * 3] / 255, 1.7); g = 150 * Math.pow(C[i * 3 + 1] / 255, 1.7); b = 150 * Math.pow(C[i * 3 + 2] / 255, 1.7);
+        } else {
+          r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
+        }
         a = fade * cut * o.alpha * 235;
         if (a < 6) continue;
-        s = o.inner ? c.spacing * scale * f * 1.05 : (wide ? 3 : 1.9) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * V.blend : 1) * f * rs;
+        s = o.inner ? c.spacing * scale * f * 1.05 : (wide ? 3 : 1.9) * (V.paper ? 1.3 : 1) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * V.blend : 1) * f * rs;
       }
       s = Math.max(1, Math.round(s));
       const col = (Math.round(a) << 24) | (b << 16) | (g << 8) | r;
@@ -208,12 +212,13 @@ nav.addEventListener('click', e => {
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
     const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
+    const paper = document.documentElement.dataset.look === 'papier';
     const wide = W > 900;
     Object.assign(V, {
       cx: (wide ? W * 0.71 : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
       scale: Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom,
       cy: Math.cos(yw), sy: Math.sin(yw), cp: Math.cos(pitch), sp: Math.sin(pitch),
-      cw: canvas.width, ch: canvas.height, rs, wide, real
+      cw: canvas.width, ch: canvas.height, rs, wide, real, paper
     });
     const edge = -half + sweep * 2 * half;
 
@@ -226,8 +231,8 @@ nav.addEventListener('click', e => {
     if (real && !inner && (zoomT > 1.05 || (wide && sweep >= 1 && !saveData))) loadInner();
 
     buf32.fill(0);
-    const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: real ? 1.7 : 1, inner: false });
-    if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: 1.3, inner: true });
+    const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: paper ? 0.3 : (real ? 1.7 : 1), inner: false });
+    if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: paper ? 0.42 : 1.3, inner: true });
     ctx.putImageData(img, 0, 0);
     if (sweep < 1 || (++hudTick % 15 === 0)) {
       hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
@@ -375,3 +380,22 @@ form.addEventListener('submit', async e => {
     msg.textContent = 'Das Senden hat nicht geklappt. Bitte schreiben Sie uns direkt an bastian.a.werner@immbild.de.';
   }
 });
+
+/* ---------- Darstellung: Papier oder Nacht ---------- */
+(function look() {
+  const root = document.documentElement;
+  const btns = $$('.look button');
+  const themeMeta = $('meta[name="theme-color"]');
+  function apply(mode) {
+    if (mode === 'papier') root.dataset.look = 'papier'; else delete root.dataset.look;
+    btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.look === (mode === 'papier' ? 'papier' : 'nacht'))));
+    if (themeMeta) themeMeta.setAttribute('content', mode === 'papier' ? '#f3f0e6' : '#07080a');
+  }
+  apply(root.dataset.look === 'papier' ? 'papier' : 'nacht');
+  btns.forEach(b => b.addEventListener('click', () => {
+    apply(b.dataset.look);
+    try { localStorage.setItem('look', b.dataset.look); } catch (e) {}
+  }));
+  const d = $('#tbDate');
+  if (d) d.textContent = new Date().toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' });
+})();

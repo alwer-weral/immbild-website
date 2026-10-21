@@ -11,6 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23f1d252' stroke-width='3'/%3E%3Cpath d='M16 10v6h5' fill='none' stroke='%23f1d252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script>try{var q=new URLSearchParams(location.search).get('look');if(q==='papier'||q==='nacht')localStorage.setItem('look',q);var l=q||localStorage.getItem('look');if(l==='papier')document.documentElement.dataset.look='papier';}catch(e){}</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,6 +20,10 @@
 
 <header class="site-header" id="header">
   <a class="logo" href="#top" aria-label="immbild. Startseite">imm<b>bild</b><i>.</i></a>
+  <div class="look" role="group" aria-label="Darstellung">
+    <button type="button" data-look="papier" aria-pressed="false">Papier</button>
+    <button type="button" data-look="nacht" aria-pressed="true">Nacht</button>
+  </div>
   <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü öffnen"><span></span><span></span></button>
   <nav id="nav" aria-label="Hauptnavigation">
     <a href="#erleben">Erleben</a>
@@ -406,6 +411,13 @@
 </main>
 
 <footer class="site-footer">
+  <div class="titleblock" aria-hidden="true">
+    <div><small>Projekt</small>immbild. Website</div>
+    <div><small>Maßstab</small>1 : 1</div>
+    <div><small>Gezeichnet</small>A. Werner · A. Krämer</div>
+    <div><small>Stand</small><span id="tbDate">2026</span></div>
+    <div><small>Blatt</small>1 / 1</div>
+  </div>
   <a class="logo" href="#top">imm<b>bild</b><i>.</i></a>
   <p>Alexander Werner &amp; Anne Krämer · Lechenicher Straße 4 · 50374 Erftstadt</p>
   <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="#top">Nach oben ↑</a></p>
