@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Impressum – immbild.</title>
-  <script>try{var q=new URLSearchParams(location.search).get('look');if(q==='papier'||q==='nacht')localStorage.setItem('look',q);var l=q||localStorage.getItem('look')||'papier';if(l==='papier')document.documentElement.dataset.look='papier';}catch(e){}</script>
+  <script>try{var q=new URLSearchParams(location.search).get('look');if(q==='nacht')q='blaupause';if(q==='papier'||q==='blaupause')localStorage.setItem('look',q);var l=q||localStorage.getItem('look')||'papier';if(l==='nacht')l='blaupause';document.documentElement.dataset.look=(l==='blaupause')?'blaupause':'papier';}catch(e){}</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>

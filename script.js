@@ -205,7 +205,7 @@ nav.addEventListener('click', e => {
       if (px < 0 || py < 0 || px >= cw - 4 || py >= ch - 4) continue;
       const laser = !o.inner && o.edge - x < 0.6;
       let r, g, b, a, s;
-      if (laser) { if (V.paper) { r = 217; g = 43; b = 34; } else { r = 93; g = 224; b = 230; } a = 255; s = 3.6 * f * rs; }
+      if (laser) { if (V.paper) { r = 217; g = 43; b = 34; } else { r = 255; g = 210; b = 63; } a = 255; s = 3.6 * f * rs; }
       else {
         const rr = Math.sqrt((x / EA) * (x / EA) + (y / EB) * (y / EB));
         const fade = o.inner ? 1 : (real ? Math.max(0, Math.min(1, (1 - rr) * 3.2)) : 1);
@@ -214,6 +214,10 @@ nav.addEventListener('click', e => {
           r = 150 * Math.pow(C[i * 3] / 255, 1.7); g = 150 * Math.pow(C[i * 3 + 1] / 255, 1.7); b = 150 * Math.pow(C[i * 3 + 2] / 255, 1.7);
         } else {
           r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
+        }
+        if (V.blue) {   // Blaupause: Linien und Punkte in Weiß- und Hellblau-Tönen
+          const v = Math.min(255, (r * 0.3 + g * 0.59 + b * 0.11) * 1.15);
+          r = v * 0.62; g = v * 0.9; b = Math.min(255, v * 0.9 + 55);
         }
         if (V.mp > 0) {   // Verwandlung: Farben verblassen zu Graphit, die Wolke tritt zurück
           const lum = r * 0.3 + g * 0.59 + b * 0.11, k = V.mp * 0.85;
@@ -230,14 +234,14 @@ nav.addEventListener('click', e => {
     return shown;
   }
 
-  function drawLines(zc, paper) {
+  function drawLines(zc, look) {
     const { cx, cyy, scale, cy, sy, cp, sp, rs } = V;
     const P = (x, y, z) => {
       const x1 = x * cy - y * sy, y1 = x * sy + y * cy, zz = z - zMid;
       const up = zz * cp + y1 * sp, depth = y1 * cp - zz * sp, f = camZ / (camZ + depth);
       return [cx + x1 * scale * f, cyy - up * scale * f];
     };
-    const ink = paper ? '#14171c' : '#ece8dc', accent = paper ? '#d92b22' : '#f1d252', halo = paper ? '#f3f0e6' : '#07080a';
+    const ink = look === 'papier' ? '#14171c' : '#f2f7ff', accent = look === 'papier' ? '#d92b22' : '#ffd23f', halo = look === 'papier' ? '#f3f0e6' : '#0b2f5b';
     const rWalls = Math.min(1, mp / 0.5), rRoof = Math.max(0, Math.min(1, (mp - 0.3) / 0.5)), rDims = Math.max(0, (mp - 0.78) / 0.22);
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     // Wände (Grundriss und Wandhöhe), zeichnen sich von links nach rechts
@@ -314,7 +318,8 @@ nav.addEventListener('click', e => {
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
     const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
-    const paper = document.documentElement.dataset.look === 'papier';
+    const look = document.documentElement.dataset.look === 'blaupause' ? 'blaupause' : 'papier';
+    const paper = look === 'papier';
     if (real && !draw) loadDrawing();
     if (sweep >= 1 && morphAuto && mpTarget === 0 && draw && !reduceMotion) { if (!morphWait) morphWait = t; if (t - morphWait > 1200) mpTarget = 1; }
     mp += Math.max(-1, Math.min(1, (mpTarget - mp) * 4)) * dt / 3800;
@@ -324,7 +329,7 @@ nav.addEventListener('click', e => {
       cx: (wide ? W * 0.71 : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
       scale: Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom,
       cy: Math.cos(yw), sy: Math.sin(yw), cp: Math.cos(pitch), sp: Math.sin(pitch),
-      cw: canvas.width, ch: canvas.height, rs, wide, real, paper, mp
+      cw: canvas.width, ch: canvas.height, rs, wide, real, paper, blue: !paper, mp
     });
     const edge = -half + sweep * 2 * half;
 
@@ -340,7 +345,7 @@ nav.addEventListener('click', e => {
     const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: paper ? 0.3 : (real ? 1.7 : 1), inner: false });
     if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: paper ? 0.42 : 1.3, inner: true });
     ctx.putImageData(img, 0, 0);
-    if (draw && mp > 0.001) drawLines(zc, paper);
+    if (draw && mp > 0.001) drawLines(zc, look);
     syncView();
     if (sweep < 1 || (++hudTick % 15 === 0)) {
       hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
@@ -495,11 +500,11 @@ form.addEventListener('submit', async e => {
   const btns = $$('.look button');
   const themeMeta = $('meta[name="theme-color"]');
   function apply(mode) {
-    if (mode === 'papier') root.dataset.look = 'papier'; else delete root.dataset.look;
-    btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.look === (mode === 'papier' ? 'papier' : 'nacht'))));
-    if (themeMeta) themeMeta.setAttribute('content', mode === 'papier' ? '#f3f0e6' : '#07080a');
+    root.dataset.look = mode === 'blaupause' ? 'blaupause' : 'papier';
+    btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.look === root.dataset.look)));
+    if (themeMeta) themeMeta.setAttribute('content', mode === 'blaupause' ? '#0b2f5b' : '#f3f0e6');
   }
-  apply(root.dataset.look === 'papier' ? 'papier' : 'nacht');
+  apply(root.dataset.look === 'blaupause' ? 'blaupause' : 'papier');
   btns.forEach(b => b.addEventListener('click', () => {
     apply(b.dataset.look);
     try { localStorage.setItem('look', b.dataset.look); } catch (e) {}
