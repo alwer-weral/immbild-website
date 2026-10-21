@@ -100,10 +100,10 @@ nav.addEventListener('click', e => {
   /* Steuerung: Mausrad zoomt, Ziehen dreht, zwei Finger zoomen */
   let zoom = 1, zoomT = 1, dragYaw = 0, dragPitch = 0;
   const dichte = new URLSearchParams(location.search).get('dichte');
-  const ZMAX = 2.6, tip = $('.cloud-tip');
+  const ZMAX = 3.2, tip = $('.cloud-tip'), saveData = !!(navigator.connection && navigator.connection.saveData);
   const clampZ = v => Math.max(1, Math.min(ZMAX, v));
   const used = () => { if (tip) tip.classList.add('used'); };
-  if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Zwei Finger: zoomen · Wischen: drehen';
+  if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Zwei Finger: ins Haus zoomen · Wischen: drehen';
   hero.addEventListener('wheel', e => {
     if (e.ctrlKey || scrollY > 2) return;
     // Oben auf der Seite: Rollen nach oben zoomt hinein, nach unten zuerst hinaus, danach scrollt die Seite normal
@@ -143,6 +143,66 @@ nav.addEventListener('click', e => {
     .then(c => { EA = 21; EB = 13.5; camZ = 80; zMid = 2.2; cloud = c; })
     .catch(() => { cloud = buildHouse(); });
 
+  /* Innenleben: wird nachgeladen, sobald man zoomt (oder auf großen Bildschirmen nach dem Scan-Aufbau) */
+  let inner = null, innerLoading = false;
+  async function loadInner() {
+    if (inner || innerLoading) return;
+    innerLoading = true;
+    try {
+      const res = await fetch('innen.bin');
+      if (!res.ok) throw new Error(res.status);
+      const dv = new DataView(await res.arrayBuffer());
+      const total = dv.getUint32(0, true);
+      const n = innerWidth < 760 ? Math.floor(total * 0.5) : total;
+      const X = new Float32Array(n), Y = new Float32Array(n), Z = new Float32Array(n), C = new Uint8Array(n * 3);
+      for (let k = 0; k < n; k++) {
+        const o = 4 + k * 9;
+        X[k] = dv.getInt16(o, true) / 100; Y[k] = dv.getInt16(o + 2, true) / 100; Z[k] = dv.getInt16(o + 4, true) / 100;
+        C[k * 3] = dv.getUint8(o + 6); C[k * 3 + 1] = dv.getUint8(o + 7); C[k * 3 + 2] = dv.getUint8(o + 8);
+      }
+      inner = { n, X, Y, Z, C, spacing: 0.09 * (total / n) ** 0.5 };
+    } catch (err) { innerLoading = false; }
+  }
+
+  const V = {};   // Kamera und Maße des aktuellen Bildes
+  /* Zeichnet eine Punktmenge. o: { edge, thr, zc, alpha, gain, inner } */
+  function plot(c, o) {
+    const { cx, cyy, scale, cy, sy, cp, sp, cw, ch, rs, wide, real } = V;
+    const X = c.X, Y = c.Y, Z = c.Z, C = c.C, R = c.R, n = c.n;
+    let shown = 0;
+    for (let i = 0; i < n; i++) {
+      const x = X[i];
+      if (x > o.edge) break;
+      shown++;
+      if (R && R[i] >= o.thr) continue;
+      const y = Y[i], z = Z[i];
+      let cut = 1;
+      if (z > o.zc) continue;
+      if (z > o.zc - 0.5) cut = (o.zc - z) / 0.5;      // Dach löst sich von oben her auf
+      const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
+      const up = (z - zMid) * cp + y1 * sp, depth = y1 * cp - (z - zMid) * sp;
+      const f = camZ / (camZ + depth);
+      const px = (cx + x1 * scale * f) | 0, py = (cyy - up * scale * f) | 0;
+      if (px < 0 || py < 0 || px >= cw - 4 || py >= ch - 4) continue;
+      const laser = !o.inner && o.edge - x < 0.6;
+      let r, g, b, a, s;
+      if (laser) { r = 93; g = 224; b = 230; a = 255; s = 3.6 * f * rs; }
+      else {
+        const rr = Math.sqrt((x / EA) * (x / EA) + (y / EB) * (y / EB));
+        const fade = o.inner ? 1 : (real ? Math.max(0, Math.min(1, (1 - rr) * 3.2)) : 1);
+        const shade = Math.max(0.5, Math.min(1.15, 0.62 + (f - 0.85) * 1.5)) * o.gain;
+        r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
+        a = fade * cut * o.alpha * 235;
+        if (a < 6) continue;
+        s = o.inner ? c.spacing * scale * f * 1.05 : (wide ? 3 : 1.9) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * V.blend : 1) * f * rs;
+      }
+      s = Math.max(1, Math.round(s));
+      const col = (Math.round(a) << 24) | (b << 16) | (g << 8) | r;
+      for (let oy = 0; oy < s; oy++) { const row = (py + oy) * cw + px; for (let ox = 0; ox < s; ox++) buf32[row + ox] = col; }
+    }
+    return shown;
+  }
+
   function frame(t) {
     if (!visible || document.hidden) { running = false; return; }
     requestAnimationFrame(frame);
@@ -157,50 +217,31 @@ nav.addEventListener('click', e => {
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
     const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
-    const cy = Math.cos(yw), sy = Math.sin(yw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     const wide = W > 900;
-    const cx = (wide ? W * 0.71 : W * 0.5) * rs, cyy = (wide ? H * 0.54 : 235) * rs;
-    const scale = Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom;
+    Object.assign(V, {
+      cx: (wide ? W * 0.71 : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
+      scale: Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom,
+      cy: Math.cos(yw), sy: Math.sin(yw), cp: Math.cos(pitch), sp: Math.sin(pitch),
+      cw: canvas.width, ch: canvas.height, rs, wide, real
+    });
     const edge = -half + sweep * 2 * half;
-    const cw = canvas.width, ch = canvas.height;
 
-    buf32.fill(0);
-    const X = c.X, Y = c.Y, Z = c.Z, C = c.C, R = c.R, n = c.n;
     // Überblick: etwa 45 % der Punkte; beim Heranzoomen kommen die übrigen dazu
     const blend = dichte === 'voll' ? 1 : dichte === 'grob' ? 0 : Math.max(0, Math.min(1, (zoom - 1) / 0.8));
-    const thr = real ? 115 + blend * 141 : 256;
-    let shown = 0;
-    for (let i = 0; i < n; i++) {
-      const x = X[i];
-      if (x > edge) break;
-      shown++;
-      if (R[i] >= thr) continue;
-      const y = Y[i], z = Z[i];
-      const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
-      const up = (z - zMid) * cp + y1 * sp, depth = y1 * cp - (z - zMid) * sp;
-      const f = camZ / (camZ + depth);
-      const px = (cx + x1 * scale * f) | 0, py = (cyy - up * scale * f) | 0;
-      if (px < 0 || py < 0 || px >= cw - 3 || py >= ch - 3) continue;
-      const laser = edge - x < 0.6;
-      let r, g, b, a;
-      if (laser) { r = 93; g = 224; b = 230; a = 255; }
-      else {
-        const rr = Math.sqrt((x / EA) * (x / EA) + (y / EB) * (y / EB));
-        const fade = real ? Math.max(0, Math.min(1, (1 - rr) * 3.2)) : 1;
-        const shade = Math.max(0.5, Math.min(1.15, 0.62 + (f - 0.85) * 1.5)) * (real ? 1.7 : 1);
-        r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
-        a = fade * 235;
-        if (a < 6) continue;
-      }
-      const s = Math.max(1, Math.round((laser ? 3.6 : (wide ? 3 : 1.9)) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * blend : 1) * f * rs));
-      const col = (a << 24) | (b << 16) | (g << 8) | r;
-      for (let oy = 0; oy < s; oy++) { const row = (py + oy) * cw + px; for (let ox = 0; ox < s; ox++) buf32[row + ox] = col; }
-    }
+    V.blend = blend;
+    // Puppenhaus: ab etwa 1,3-fachem Zoom öffnen sich die Dächer von oben nach unten
+    const open = real && dichte !== 'zu' ? Math.max(0, Math.min(1, (zoom - 1.3) / 0.9)) : 0;
+    const zc = 12 - open * (12 - 2.55);
+    if (real && !inner && (zoomT > 1.05 || (wide && sweep >= 1 && !saveData))) loadInner();
+
+    buf32.fill(0);
+    const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: real ? 1.7 : 1, inner: false });
+    if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: 1.3, inner: true });
     ctx.putImageData(img, 0, 0);
     if (sweep < 1 || (++hudTick % 15 === 0)) {
       hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
       hudBar.style.width = sweep * 100 + '%';
-      hudPts.textContent = Math.round(shown / n * (real ? REAL_POINTS : 340000)).toLocaleString('de-DE');
+      hudPts.textContent = Math.round(shown / c.n * (real ? REAL_POINTS : 340000)).toLocaleString('de-DE');
     }
   }
   start();
