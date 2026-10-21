@@ -59,7 +59,7 @@ nav.addEventListener('click', e => {
       else if (r < .7) { const w = Math.floor(Math.random() * 4), y = rnd(0, 1.2); w < 2 ? put(rnd(-1.6, 1.6), y, w ? 1 : -1, 'wall') : put(w === 2 ? -1.6 : 1.6, y, rnd(-1, 1), 'wall'); }
       else { const s = Math.random() < .5 ? 1 : -1, t = Math.random(); put(rnd(-1.7, 1.7), 1.2 + (1 - t) * .75, s * t * 1.1, 'roof'); }
     }
-    return { n: N, X, Y, Z, C, real: false };
+    return { n: N, X, Y, Z, C, R: new Uint8Array(N), real: false };
   }
 
   /* Echte Wolke aus cloud.bin: uint32 Anzahl, dann je Punkt int16 x,y,z (cm) und uint8 r,g,b */
@@ -74,13 +74,14 @@ nav.addEventListener('click', e => {
     const xs = new Float32Array(total);
     for (let i = 0; i < total; i++) xs[i] = dv.getInt16(4 + i * 9, true) / 100;
     idx.sort((a, b) => xs[a] - xs[b]);   // von links nach rechts, für den Scan-Aufbau
-    const X = new Float32Array(n), Y = new Float32Array(n), Z = new Float32Array(n), C = new Uint8Array(n * 3);
+    const X = new Float32Array(n), Y = new Float32Array(n), Z = new Float32Array(n), C = new Uint8Array(n * 3), R = new Uint8Array(n);
     for (let k = 0; k < n; k++) {
       const o = 4 + idx[k] * 9;
+      R[k] = Math.floor(idx[k] * 256 / total);
       X[k] = dv.getInt16(o, true) / 100; Y[k] = dv.getInt16(o + 2, true) / 100; Z[k] = dv.getInt16(o + 4, true) / 100;
       C[k * 3] = dv.getUint8(o + 6); C[k * 3 + 1] = dv.getUint8(o + 7); C[k * 3 + 2] = dv.getUint8(o + 8);
     }
-    return { n, X, Y, Z, C, real: true };
+    return { n, X, Y, Z, C, R, real: true };
   }
 
   let W, H, rs, img, buf32, yaw = -0.55, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
@@ -98,6 +99,7 @@ nav.addEventListener('click', e => {
 
   /* Steuerung: Mausrad zoomt, Ziehen dreht, zwei Finger zoomen */
   let zoom = 1, zoomT = 1, dragYaw = 0, dragPitch = 0;
+  const dichte = new URLSearchParams(location.search).get('dichte');
   const ZMAX = 2.6, tip = $('.cloud-tip');
   const clampZ = v => Math.max(1, Math.min(ZMAX, v));
   const used = () => { if (tip) tip.classList.add('used'); };
@@ -163,12 +165,16 @@ nav.addEventListener('click', e => {
     const cw = canvas.width, ch = canvas.height;
 
     buf32.fill(0);
-    const X = c.X, Y = c.Y, Z = c.Z, C = c.C, n = c.n;
+    const X = c.X, Y = c.Y, Z = c.Z, C = c.C, R = c.R, n = c.n;
+    // Überblick: etwa 45 % der Punkte; beim Heranzoomen kommen die übrigen dazu
+    const blend = dichte === 'voll' ? 1 : dichte === 'grob' ? 0 : Math.max(0, Math.min(1, (zoom - 1) / 0.8));
+    const thr = real ? 115 + blend * 141 : 256;
     let shown = 0;
     for (let i = 0; i < n; i++) {
       const x = X[i];
       if (x > edge) break;
       shown++;
+      if (R[i] >= thr) continue;
       const y = Y[i], z = Z[i];
       const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
       const up = (z - zMid) * cp + y1 * sp, depth = y1 * cp - (z - zMid) * sp;
@@ -186,7 +192,7 @@ nav.addEventListener('click', e => {
         a = fade * 235;
         if (a < 6) continue;
       }
-      const s = Math.max(1, Math.round((laser ? 3.6 : (wide ? 3 : 1.9)) * (1 + (zoom - 1) * 0.8) * f * rs));
+      const s = Math.max(1, Math.round((laser ? 3.6 : (wide ? 3 : 1.9)) * (1 + (zoom - 1) * 0.6) * (real ? 1 - 0.3 * blend : 1) * f * rs));
       const col = (a << 24) | (b << 16) | (g << 8) | r;
       for (let oy = 0; oy < s; oy++) { const row = (py + oy) * cw + px; for (let ox = 0; ox < s; ox++) buf32[row + ox] = col; }
     }
