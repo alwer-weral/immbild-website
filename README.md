@@ -1,6 +1,6 @@
 # immbild.
 
-Neue Website für immbild.de (Alexander Werner & Anne Krämer, Erftstadt): virtuelle 3D-Rundgänge mit Matterport und Leica BLK sowie Immobilien-, Objekt- und Architekturfotografie.
+Neue Website für immbild.de (Alexander Werner, Erftstadt): virtuelle 3D-Rundgänge mit Matterport und Leica BLK sowie Immobilien-, Objekt- und Architekturfotografie.
 
 Reines HTML, CSS und JavaScript, ohne Build-Schritt, ohne externe Schriften oder Tracker.
 
