@@ -276,7 +276,7 @@ nav.addEventListener('click', e => {
       ctx.stroke();
       for (const d of draw.dims) {
         const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
-        const mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2 - 7 * rs, label = 'ca. ' + d.label;
+        const mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2 - 7 * rs, label = d.label;
         ctx.lineWidth = 4 * rs; ctx.strokeStyle = halo; ctx.strokeText(label, mx2, my2);
         ctx.fillText(label, mx2, my2);
       }
