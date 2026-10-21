@@ -28,144 +28,173 @@ nav.addEventListener('click', e => {
   const ctx = canvas.getContext('2d');
   const hero = $('.hero');
   const hudPct = $('#hudPct'), hudBar = $('#hudBar'), hudPts = $('#hudPts');
+  const REAL_POINTS = 16386303;            // Punkte des echten Scan-Ausschnitts, nur für die Anzeige
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const N = innerWidth < 760 ? 3600 : 8000;
-  const pts = [];
 
-  const inWindow = (x, y, z, wall) => {
-    if (wall === 'front') return (Math.abs(x + 0.9) < 0.28 || Math.abs(x - 0.7) < 0.28) && y > 0.4 && y < 0.95;
-    if (wall === 'side') return Math.abs(z) < 0.25 && y > 0.4 && y < 0.95;
-    return false;
-  };
-  const add = (x, y, z, k) => pts.push({ x, y, z, k });
+  // Datenformat: Meter, Z zeigt nach oben, Mittelpunkt bei 0/0
+  let cloud = null;
+  let EA = 22, EB = 15, camZ = 70, zMid = 4, perM = 0.0145, perMsmall = 0.022;
 
-  // Kanten: Gebäudehülle, Giebel, Fenster, Tür, Innenwand
-  const edges = [
-    [-1.6, 0, 1, 1.6, 0, 1], [1.6, 0, 1, 1.6, 0, -1], [1.6, 0, -1, -1.6, 0, -1], [-1.6, 0, -1, -1.6, 0, 1],
-    [-1.6, 1.2, 1, 1.6, 1.2, 1], [1.6, 1.2, 1, 1.6, 1.2, -1], [1.6, 1.2, -1, -1.6, 1.2, -1], [-1.6, 1.2, -1, -1.6, 1.2, 1],
-    [-1.6, 0, 1, -1.6, 1.2, 1], [1.6, 0, 1, 1.6, 1.2, 1], [1.6, 0, -1, 1.6, 1.2, -1], [-1.6, 0, -1, -1.6, 1.2, -1],
-    [-1.7, 1.95, 0, 1.7, 1.95, 0], [-1.7, 1.2, 1.1, -1.7, 1.95, 0], [-1.7, 1.2, -1.1, -1.7, 1.95, 0],
-    [1.7, 1.2, 1.1, 1.7, 1.95, 0], [1.7, 1.2, -1.1, 1.7, 1.95, 0],
-    [-1.7, 1.2, 1.1, 1.7, 1.2, 1.1], [-1.7, 1.2, -1.1, 1.7, 1.2, -1.1],
-    [-1.18, .4, 1, -.62, .4, 1], [-1.18, .95, 1, -.62, .95, 1], [-1.18, .4, 1, -1.18, .95, 1], [-.62, .4, 1, -.62, .95, 1],
-    [.42, .4, 1, .98, .4, 1], [.42, .95, 1, .98, .95, 1], [.42, .4, 1, .42, .95, 1], [.98, .4, 1, .98, .95, 1],
-    [-.2, 0, 1, -.2, .8, 1], [.2, 0, 1, .2, .8, 1], [-.2, .8, 1, .2, .8, 1],
-    [-.35, 0, -1, -.35, 1.2, -1], [-.35, 0, .25, -.35, 1.2, .25], [-.35, 1.2, -1, -.35, 1.2, .25],
-    [-.35, 0, .15, 1.6, 0, .15], [-.35, 1.2, .15, 1.6, 1.2, .15]
-  ];
-  while (pts.length < N * 0.32) {
-    const e = edges[Math.floor(Math.random() * edges.length)], t = Math.random(), j = 0.012;
-    add(e[0] + (e[3] - e[0]) * t + rnd(-j, j), e[1] + (e[4] - e[1]) * t + rnd(-j, j), e[2] + (e[5] - e[2]) * t + rnd(-j, j), 'edge');
+  /* Ersatz: gebautes Punktwolken-Haus, falls die echte Wolke nicht lädt */
+  function buildHouse() {
+    const N = innerWidth < 760 ? 3600 : 9000;
+    const X = new Float32Array(N), Y = new Float32Array(N), Z = new Float32Array(N), C = new Uint8Array(N * 3);
+    const edges = [
+      [-1.6, 0, 1, 1.6, 0, 1], [1.6, 0, 1, 1.6, 0, -1], [1.6, 0, -1, -1.6, 0, -1], [-1.6, 0, -1, -1.6, 0, 1],
+      [-1.6, 1.2, 1, 1.6, 1.2, 1], [1.6, 1.2, 1, 1.6, 1.2, -1], [1.6, 1.2, -1, -1.6, 1.2, -1], [-1.6, 1.2, -1, -1.6, 1.2, 1],
+      [-1.6, 0, 1, -1.6, 1.2, 1], [1.6, 0, 1, 1.6, 1.2, 1], [1.6, 0, -1, 1.6, 1.2, -1], [-1.6, 0, -1, -1.6, 1.2, -1],
+      [-1.7, 1.95, 0, 1.7, 1.95, 0], [-1.7, 1.2, 1.1, -1.7, 1.95, 0], [-1.7, 1.2, -1.1, -1.7, 1.95, 0],
+      [1.7, 1.2, 1.1, 1.7, 1.95, 0], [1.7, 1.2, -1.1, 1.7, 1.95, 0], [-1.7, 1.2, 1.1, 1.7, 1.2, 1.1], [-1.7, 1.2, -1.1, 1.7, 1.2, -1.1]
+    ];
+    const col = { edge: [255, 244, 190], wall: [241, 210, 82], roof: [241, 120, 82], floor: [120, 130, 140] };
+    let i = 0;
+    const put = (x, y, z, k) => { X[i] = x * 6; Y[i] = z * 6; Z[i] = y * 6; C[i * 3] = col[k][0]; C[i * 3 + 1] = col[k][1]; C[i * 3 + 2] = col[k][2]; i++; };
+    while (i < N * 0.35) {
+      const e = edges[Math.floor(Math.random() * edges.length)], t = Math.random(), j = .012;
+      put(e[0] + (e[3] - e[0]) * t + rnd(-j, j), e[1] + (e[4] - e[1]) * t + rnd(-j, j), e[2] + (e[5] - e[2]) * t + rnd(-j, j), 'edge');
+    }
+    while (i < N) {
+      const r = Math.random();
+      if (r < .2) put(rnd(-3.2, 3.2), 0, rnd(-2.2, 2.2), 'floor');
+      else if (r < .7) { const w = Math.floor(Math.random() * 4), y = rnd(0, 1.2); w < 2 ? put(rnd(-1.6, 1.6), y, w ? 1 : -1, 'wall') : put(w === 2 ? -1.6 : 1.6, y, rnd(-1, 1), 'wall'); }
+      else { const s = Math.random() < .5 ? 1 : -1, t = Math.random(); put(rnd(-1.7, 1.7), 1.2 + (1 - t) * .75, s * t * 1.1, 'roof'); }
+    }
+    return { n: N, X, Y, Z, C, real: false };
   }
 
-  while (pts.length < N) {
-    const r = Math.random();
-    if (r < .17) add(rnd(-1.6, 1.6), 0, rnd(-1, 1), 'floor');
-    else if (r < .40) {                      // Außenwände
-      const w = Math.floor(Math.random() * 4), y = rnd(0, 1.2);
-      if (w === 0) { const x = rnd(-1.6, 1.6); if (!inWindow(x, y, 1, 'front')) add(x, y, 1, 'wall'); }
-      else if (w === 1) add(rnd(-1.6, 1.6), y, -1, 'wall');
-      else { const z = rnd(-1, 1); if (!inWindow(0, y, z, 'side')) add(w === 2 ? -1.6 : 1.6, y, z, 'wall'); }
+  /* Echte Wolke aus cloud.bin: uint32 Anzahl, dann je Punkt int16 x,y,z (cm) und uint8 r,g,b */
+  async function loadReal() {
+    const res = await fetch('cloud.bin');
+    if (!res.ok) throw new Error(res.status);
+    const buf = await res.arrayBuffer();
+    const dv = new DataView(buf);
+    const total = dv.getUint32(0, true);
+    const n = innerWidth < 760 ? Math.floor(total * 0.5) : total;   // Reihenfolge in der Datei ist gemischt, also gleichmäßig ausgedünnt
+    const idx = new Uint32Array(n); for (let i = 0; i < n; i++) idx[i] = i;
+    const xs = new Float32Array(total);
+    for (let i = 0; i < total; i++) xs[i] = dv.getInt16(4 + i * 9, true) / 100;
+    idx.sort((a, b) => xs[a] - xs[b]);   // von links nach rechts, für den Scan-Aufbau
+    const X = new Float32Array(n), Y = new Float32Array(n), Z = new Float32Array(n), C = new Uint8Array(n * 3);
+    for (let k = 0; k < n; k++) {
+      const o = 4 + idx[k] * 9;
+      X[k] = dv.getInt16(o, true) / 100; Y[k] = dv.getInt16(o + 2, true) / 100; Z[k] = dv.getInt16(o + 4, true) / 100;
+      C[k * 3] = dv.getUint8(o + 6); C[k * 3 + 1] = dv.getUint8(o + 7); C[k * 3 + 2] = dv.getUint8(o + 8);
     }
-    else if (r < .50) add(-0.35, rnd(0, 1.2), rnd(-1, 0.25), 'int');
-    else if (r < .58) add(rnd(-0.35, 1.6), rnd(0, 1.2), 0.15, 'int');
-    else if (r < .74) {                      // Dach
-      const side = Math.random() < .5 ? 1 : -1, t = Math.random(), x = rnd(-1.7, 1.7);
-      add(x, 1.2 + (1 - t) * 0.75, side * t * 1.1, 'roof');
-    }
-    else if (r < .80) {                      // Möbel
-      const b = [[-1.2, .25, -0.4, .5, .25, .22], [0.5, .22, -0.5, .5, .22, .3], [1.0, .3, .6, .35, .3, .3]][Math.floor(Math.random() * 3)];
-      add(b[0] + rnd(-b[3], b[3]), rnd(0, b[4] * 2), b[2] + rnd(-b[5], b[5]), 'furn');
-    }
-    else if (r < .92) add(rnd(-3.4, 3.4), 0, rnd(-2.2, 2.4), 'ground');
-    else {                                   // Bäume
-      const tx = Math.random() < .5 ? -2.4 : 2.5, tz = Math.random() < .5 ? -1.2 : 1.4;
-      const a = rnd(0, 6.28), rr = rnd(0, .4);
-      add(tx + Math.cos(a) * rr, rnd(.5, 1.3), tz + Math.sin(a) * rr, 'tree');
-    }
+    return { n, X, Y, Z, C, real: true };
   }
-  pts.sort((a, b) => a.x - b.x);
 
-  const cols = { edge: [255, 244, 190], floor: [120, 130, 140], wall: [241, 210, 82], int: [255, 185, 74], roof: [241, 120, 82], furn: [93, 224, 230], ground: [90, 100, 100], tree: [120, 200, 130] };
-  const kinds = Object.keys(cols), LV = 5;
-  const kindIdx = {}; kinds.forEach((k, i) => { kindIdx[k] = i; });
-  pts.forEach(p => { p.ki = kindIdx[p.k]; });
-  const styles = kinds.map(k => Array.from({ length: LV }, (_, l) => {
-    const a = (k === 'ground' ? 0.35 : 0.85) * (0.15 + 0.85 * (l + 1) / LV);
-    return `rgba(${cols[k][0]},${cols[k][1]},${cols[k][2]},${a.toFixed(2)})`;
-  }));
-  const buckets = kinds.map(() => Array.from({ length: LV }, () => new Float32Array(N * 3)));
-  const counts = new Int32Array(kinds.length * LV);
-  const laserBuf = new Float32Array(N * 3);
-
-  let W, H, dpr, yaw = -0.6, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
+  let W, H, rs, img, buf32, yaw = -0.55, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
 
   function resize() {
-    dpr = Math.min(devicePixelRatio || 1, 1.25);
     W = canvas.clientWidth; H = canvas.clientHeight;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    rs = Math.max(0.6, Math.min(devicePixelRatio || 1, 1.5, 1300 / W));
+    canvas.width = Math.round(W * rs); canvas.height = Math.round(H * rs);
+    img = ctx.createImageData(canvas.width, canvas.height);
+    buf32 = new Uint32Array(img.data.buffer);
   }
   resize(); addEventListener('resize', resize);
   hero.addEventListener('pointermove', e => { mx = (e.clientX / innerWidth - .5) * 2; my = (e.clientY / innerHeight - .5) * 2; });
   addEventListener('scroll', () => { scrollP = Math.min(1, scrollY / innerHeight); }, { passive: true });
 
+  /* Steuerung: Mausrad zoomt, Ziehen dreht, zwei Finger zoomen */
+  let zoom = 1, zoomT = 1, dragYaw = 0, dragPitch = 0;
+  const ZMAX = 2.6, tip = $('.cloud-tip');
+  const clampZ = v => Math.max(1, Math.min(ZMAX, v));
+  const used = () => { if (tip) tip.classList.add('used'); };
+  if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Zwei Finger: zoomen · Wischen: drehen';
+  hero.addEventListener('wheel', e => {
+    if (e.ctrlKey || scrollY > 2) return;
+    // Oben auf der Seite: Rollen nach oben zoomt hinein, nach unten zuerst hinaus, danach scrollt die Seite normal
+    if (e.deltaY < 0 || zoomT > 1.001) { e.preventDefault(); zoomT = clampZ(zoomT * Math.exp(-e.deltaY * 0.0018)); used(); }
+  }, { passive: false });
+  const ptrs = new Map(); let pinch0 = 0, zoom0 = 1;
+  hero.addEventListener('pointerdown', e => {
+    if (e.button > 0 || e.target.closest('a, button, input')) return;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = zoomT; }
+  });
+  hero.addEventListener('pointermove', e => {
+    const p = ptrs.get(e.pointerId); if (!p) return;
+    if (e.pointerType === 'mouse' && !(e.buttons & 1)) { ptrs.delete(e.pointerId); return; }
+    if (ptrs.size === 2) {
+      p.x = e.clientX; p.y = e.clientY;
+      const [a, b] = [...ptrs.values()];
+      if (pinch0) zoomT = clampZ(zoom0 * Math.hypot(a.x - b.x, a.y - b.y) / pinch0);
+      used(); return;
+    }
+    dragYaw += (e.clientX - p.x) * 0.006;
+    dragPitch = Math.max(-0.7, Math.min(0.45, dragPitch + (e.clientY - p.y) * 0.004));
+    p.x = e.clientX; p.y = e.clientY; used();
+  });
+  const endPtr = e => { ptrs.delete(e.pointerId); };
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => hero.addEventListener(ev, endPtr));
+  $('#zoomIn')?.addEventListener('click', () => { zoomT = clampZ(zoomT * 1.4); used(); });
+  $('#zoomOut')?.addEventListener('click', () => { zoomT = clampZ(zoomT / 1.4); used(); });
+
   function start() { if (!running && visible && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(hero);
   document.addEventListener('visibilitychange', start);
 
+  // Erst die echte Wolke laden (höchstens 3,5 Sekunden), sonst das gebaute Haus zeigen
+  const giveUp = new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 3500));
+  Promise.race([loadReal(), giveUp])
+    .then(c => { EA = 21; EB = 13.5; camZ = 80; zMid = 2.2; cloud = c; })
+    .catch(() => { cloud = buildHouse(); });
+
   function frame(t) {
     if (!visible || document.hidden) { running = false; return; }
     requestAnimationFrame(frame);
-    if (t - lastDraw < 32) return;            // höchstens etwa 30 Bilder pro Sekunde
+    if (!cloud || t - lastDraw < 32) return;  // höchstens etwa 30 Bilder pro Sekunde
     lastDraw = t;
     const dt = Math.min(80, t - last || 33); last = t;
-    if (!reduceMotion) { sweep = Math.min(1, sweep + dt / 4200); yaw += dt * 0.00009; }
-    const yw = yaw + mx * 0.35 + scrollP * 1.2;
-    const pitch = 0.42 + my * 0.08 - scrollP * 0.2;
+    if (!reduceMotion) { sweep = Math.min(1, sweep + dt / 5200); yaw += dt * 0.00007; }
+
+    const c = cloud, real = c.real;
+    const half = real ? EA : 10;
+    zoom += (zoomT - zoom) * 0.22;
+    hero.classList.toggle('zoomed', zoomT > 1.25);
+    const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
+    const pitch = Math.max(0.3, Math.min(1.5, (real ? 1.08 : 0.5) + dragPitch + my * 0.08 - scrollP * 0.25));
     const cy = Math.cos(yw), sy = Math.sin(yw), cp = Math.cos(pitch), sp = Math.sin(pitch);
-    const cx = W > 900 ? W * 0.71 : W * 0.5, cyy = H * (W > 900 ? 0.5 : 0.72);
-    const scale = Math.min(W, H * 1.3) * (W > 900 ? 0.17 : 0.14);
-    const camZ = 10;
-    const edge = -3.6 + sweep * 7.2;
+    const wide = W > 900;
+    const cx = (wide ? W * 0.71 : W * 0.5) * rs, cyy = (wide ? H * 0.54 : 235) * rs;
+    const scale = Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom;
+    const edge = -half + sweep * 2 * half;
+    const cw = canvas.width, ch = canvas.height;
 
-    counts.fill(0);
-    let laserN = 0, shown = 0;
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i];
-      if (p.x > edge) break;
+    buf32.fill(0);
+    const X = c.X, Y = c.Y, Z = c.Z, C = c.C, n = c.n;
+    let shown = 0;
+    for (let i = 0; i < n; i++) {
+      const x = X[i];
+      if (x > edge) break;
       shown++;
-      const x1 = p.x * cy - p.z * sy, z1 = p.x * sy + p.z * cy;
-      const y2 = (p.y - 0.6) * cp - z1 * sp, z2 = (p.y - 0.6) * sp + z1 * cp;
-      const f = camZ / (camZ + z2);
-      const sx = cx + x1 * scale * f, sy2 = cyy - y2 * scale * f;
-      if (edge - p.x < 0.07) { const o = laserN * 3; laserBuf[o] = sx; laserBuf[o + 1] = sy2; laserBuf[o + 2] = 3.4 * f; laserN++; continue; }
-      const near = Math.max(0.15, Math.min(1, f * f * 0.85));
-      const lv = Math.min(LV - 1, Math.floor(near * LV));
-      const b = p.ki * LV + lv, o = counts[b] * 3;
-      const buf = buckets[p.ki][lv];
-      buf[o] = sx; buf[o + 1] = sy2; buf[o + 2] = 2.1 * f;
-      counts[b]++;
-    }
-
-    ctx.clearRect(0, 0, W, H);
-    for (let k = 0; k < kinds.length; k++) {
-      for (let l = 0; l < LV; l++) {
-        const n = counts[k * LV + l];
-        if (!n) continue;
-        ctx.fillStyle = styles[k][l];
-        const buf = buckets[k][l];
-        for (let j = 0; j < n; j++) { const o = j * 3; ctx.fillRect(buf[o], buf[o + 1], buf[o + 2], buf[o + 2]); }
+      const y = Y[i], z = Z[i];
+      const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
+      const up = (z - zMid) * cp + y1 * sp, depth = y1 * cp - (z - zMid) * sp;
+      const f = camZ / (camZ + depth);
+      const px = (cx + x1 * scale * f) | 0, py = (cyy - up * scale * f) | 0;
+      if (px < 0 || py < 0 || px >= cw - 3 || py >= ch - 3) continue;
+      const laser = edge - x < 0.6;
+      let r, g, b, a;
+      if (laser) { r = 93; g = 224; b = 230; a = 255; }
+      else {
+        const rr = Math.sqrt((x / EA) * (x / EA) + (y / EB) * (y / EB));
+        const fade = real ? Math.max(0, Math.min(1, (1 - rr) * 3.2)) : 1;
+        const shade = Math.max(0.5, Math.min(1.15, 0.62 + (f - 0.85) * 1.5)) * (real ? 1.7 : 1);
+        r = Math.min(255, C[i * 3] * shade); g = Math.min(255, C[i * 3 + 1] * shade); b = Math.min(255, C[i * 3 + 2] * shade);
+        a = fade * 235;
+        if (a < 6) continue;
       }
+      const s = Math.max(1, Math.round((laser ? 3.6 : (wide ? 3 : 1.9)) * (1 + (zoom - 1) * 0.8) * f * rs));
+      const col = (a << 24) | (b << 16) | (g << 8) | r;
+      for (let oy = 0; oy < s; oy++) { const row = (py + oy) * cw + px; for (let ox = 0; ox < s; ox++) buf32[row + ox] = col; }
     }
-    if (laserN) {
-      ctx.fillStyle = 'rgba(93,224,230,.95)';
-      for (let j = 0; j < laserN; j++) { const o = j * 3; ctx.fillRect(laserBuf[o], laserBuf[o + 1], laserBuf[o + 2], laserBuf[o + 2]); }
-    }
+    ctx.putImageData(img, 0, 0);
     if (sweep < 1 || (++hudTick % 15 === 0)) {
       hudPct.textContent = String(Math.round(sweep * 100)).padStart(3, '0');
       hudBar.style.width = sweep * 100 + '%';
-      hudPts.textContent = (Math.round(shown * 38.5)).toLocaleString('de-DE');
+      hudPts.textContent = Math.round(shown / n * (real ? REAL_POINTS : 340000)).toLocaleString('de-DE');
     }
   }
   start();

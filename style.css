@@ -65,6 +65,15 @@ nav a.btn { color: #101010; }
 .hero-vignette { position: absolute; inset: 0; z-index: -1; background:
   radial-gradient(ellipse at 30% 50%, rgba(7, 8, 10, .85) 0%, rgba(7, 8, 10, .35) 55%, transparent 80%),
   linear-gradient(to bottom, rgba(7, 8, 10, .5), transparent 25%, transparent 70%, var(--bg)); }
+.hero { user-select: none; -webkit-user-select: none; touch-action: pan-y; cursor: grab; }
+.hero a, .hero button { cursor: pointer; }
+.hero-inner { transition: opacity .5s; }
+.hero.zoomed .hero-inner { opacity: .22; }
+.cloud-ctrl { position: absolute; right: calc(clamp(1rem, 4vw, 3rem) + 216px); bottom: 2.4rem; z-index: 2; display: flex; align-items: center; gap: .5rem; }
+.cloud-ctrl button { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: rgba(7, 8, 10, .82); color: var(--ink); font-size: 1.3rem; line-height: 1; cursor: pointer; transition: border-color .2s, transform .2s; }
+.cloud-ctrl button:hover { border-color: var(--gold); transform: scale(1.08); }
+.cloud-tip { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .75rem; color: var(--muted); margin-right: .5rem; transition: opacity .6s; }
+.cloud-tip.used { opacity: 0; }
 .hero-inner { padding: 7rem clamp(1.2rem, 6vw, 6rem) 5rem; max-width: 1100px; }
 .eyebrow { display: inline-flex; align-items: center; gap: .6rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); margin-bottom: 1.6rem; padding: .45rem .9rem; border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, .03); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold); animation: blink 2s infinite; }
@@ -261,6 +270,8 @@ details p { color: var(--muted); padding: 0 2.5rem 1.3rem 0; margin: 0; }
   nav.open { transform: none; visibility: visible; opacity: 1; transition: transform .5s var(--ease), opacity .4s; } nav a { font-size: 1.6rem; color: var(--ink); }
   .site-header { z-index: 60; } .nav-toggle { z-index: 70; }
   .hud { display: none; } .scroll-hint { display: none; }
+  .cloud-ctrl { right: 1rem; bottom: auto; top: 4.6rem; } .cloud-tip { display: none; }
+  .hero-inner { padding-top: 20rem; padding-bottom: 4rem; }
   .bento { grid-template-columns: 1fr; } .tile.big, .tile.wide { grid-column: auto; }
   .form .two { grid-template-columns: 1fr; }
   .play { width: 70px; height: 70px; } .poster-note { display: none; }
