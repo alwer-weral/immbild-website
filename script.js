@@ -153,7 +153,7 @@ nav.addEventListener('click', e => {
     } catch (err) { innerLoading = false; }
   }
 
-  /* Zeichnung: Wände, Dachhöhenlinien und Maße aus echten Scan-Daten (zeichnung.json) */
+  /* Zeichnung: Wände, Schraffur, Dachhöhenlinien, Maßketten, Achsen und Koten aus echten Scan-Daten (zeichnung.json) */
   let draw = null, drawLoading = false;
   async function loadDrawing() {
     if (draw || drawLoading) return;
@@ -169,7 +169,7 @@ nav.addEventListener('click', e => {
         const L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), n = Math.max(1, Math.round(L / 0.8)), pts = [];
         for (let i = 0; i <= n; i++) {
           const u = i / n, e = (i === 0 || i === n) ? 0.4 : 1;
-          pts.push([a[0] + (b[0] - a[0]) * u + rand() * 0.06 * e, a[1] + (b[1] - a[1]) * u + rand() * 0.06 * e, a[2] + (b[2] - a[2]) * u + rand() * 0.04 * e]);
+          pts.push([a[0] + (b[0] - a[0]) * u + rand() * 0.05 * e, a[1] + (b[1] - a[1]) * u + rand() * 0.05 * e, a[2] + (b[2] - a[2]) * u + rand() * 0.04 * e]);
         }
         return pts;
       };
@@ -179,7 +179,13 @@ nav.addEventListener('click', e => {
         walls.push([[s[0], s[1], F], [s[0], s[1], T]], [[s[2], s[3], F], [s[2], s[3], T]]);
       }
       j.roof.sort((p, q) => Math.min(p[0], p[3]) - Math.min(q[0], q[3]));
-      draw = { walls, roof: j.roof, dims: j.dims };
+      j.poche.sort((p, q) => p[0] - q[0]);
+      j.hatch.sort((p, q) => p[0] - q[0]);
+      draw = {
+        walls, roof: j.roof, floor: F, poche: j.poche, hatch: j.hatch,
+        chains: j.chains, ext: j.ext, axes: j.axes, koten: j.koten, bar: j.bar, section: j.section, north: j.north,
+        dims: j.dims.filter(d => d.label.startsWith('First'))
+      };
     } catch (err) { drawLoading = false; }
   }
 
@@ -241,10 +247,43 @@ nav.addEventListener('click', e => {
       const up = zz * cp + y1 * sp, depth = y1 * cp - zz * sp, f = camZ / (camZ + depth);
       return [cx + x1 * scale * f, cyy - up * scale * f];
     };
-    const ink = look === 'papier' ? '#14171c' : '#f2f7ff', accent = look === 'papier' ? '#d92b22' : '#ffd23f', halo = look === 'papier' ? '#f3f0e6' : '#0b2f5b';
-    const rWalls = Math.min(1, mp / 0.5), rRoof = Math.max(0, Math.min(1, (mp - 0.3) / 0.5)), rDims = Math.max(0, (mp - 0.78) / 0.22);
+    const paper = look === 'papier';
+    const ink = paper ? '#14171c' : '#f2f7ff', accent = paper ? '#d92b22' : '#ffd23f', halo = paper ? '#f3f0e6' : '#0b2f5b';
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const rWalls = clamp01(mp / 0.5), rRoof = clamp01((mp - 0.3) / 0.5), rPlan = clamp01((mp - 0.62) / 0.3), rDims = clamp01((mp - 0.78) / 0.22);
+    const detail = clamp01((zoom - 1) / 0.6);              // je näher man kommt, desto mehr Maße erscheinen
+    const F = draw.floor, u = rs;
+    const font = (px, w) => w + ' ' + Math.round(px * rs + 1) + 'px ui-monospace, Menlo, monospace';
+    const text = (str, x, y, color, px, weight) => {
+      ctx.font = font(px, weight || '600'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 4 * u; ctx.strokeStyle = halo; ctx.strokeText(str, x, y);
+      ctx.fillStyle = color; ctx.fillText(str, x, y);
+    };
+    const circle = (x, y, r, color, label) => {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = halo; ctx.fill(); ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, 1.1 * u); ctx.stroke();
+      if (label) text(label, x, y + 0.5 * u, color, wide ? 10 : 8);
+    };
+    const wide = V.wide;
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // Wände (Grundriss und Wandhöhe), zeichnen sich von links nach rechts
+
+    // 1) Geschnittene Wände am Boden: gefüllt und schraffiert (stärkste Linien der Zeichnung)
+    const nP = draw.poche.length, shownP = rWalls * nP;
+    ctx.beginPath();
+    for (let i = 0; i < nP && i < shownP; i++) {
+      const q = draw.poche[i], a = P(q[0], q[1], F), b = P(q[2], q[1], F), c = P(q[2], q[3], F), d = P(q[0], q[3], F);
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
+    }
+    ctx.fillStyle = ink; ctx.globalAlpha = 0.28; ctx.fill();
+    ctx.strokeStyle = ink; ctx.globalAlpha = 0.95; ctx.lineWidth = Math.max(1, 1.8 * u); ctx.stroke();
+    const nH = draw.hatch.length, shownH = rWalls * nH;
+    ctx.beginPath();
+    for (let i = 0; i < nH && i < shownH; i++) {
+      const h = draw.hatch[i], a = P(h[0], h[1], F), b = P(h[2], h[3], F);
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+    }
+    ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(1, 0.7 * u); ctx.stroke();
+
+    // 2) Wandflächen im Raum (mittlere Linienstärke), zeichnen sich von links nach rechts
     const nW = draw.walls.length, shownW = rWalls * nW;
     ctx.beginPath();
     for (let i = 0; i < nW && i < shownW; i++) {
@@ -252,8 +291,9 @@ nav.addEventListener('click', e => {
       let p = P(pts[0][0], pts[0][1], pts[0][2]); ctx.moveTo(p[0], p[1]);
       for (let k = 1; k <= last && k < pts.length; k++) { p = P(pts[k][0], pts[k][1], pts[k][2]); ctx.lineTo(p[0], p[1]); }
     }
-    ctx.strokeStyle = ink; ctx.globalAlpha = 0.95; ctx.lineWidth = Math.max(1, 2.0 * rs); ctx.stroke();
-    // Dach als Höhenlinien; sie lösen sich beim Hineinzoomen von oben nach unten auf
+    ctx.strokeStyle = ink; ctx.globalAlpha = 0.6; ctx.lineWidth = Math.max(1, 1.15 * u); ctx.stroke();
+
+    // 3) Dach als Höhenlinien (dünn); sie lösen sich beim Hineinzoomen von oben nach unten auf
     if (rRoof > 0) {
       const nR = draw.roof.length, shownR = rRoof * nR;
       ctx.beginPath();
@@ -263,26 +303,87 @@ nav.addEventListener('click', e => {
         const a = P(s[0], s[1], s[2]), b = P(s[3], s[4], s[5]);
         ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
       }
-      ctx.strokeStyle = ink; ctx.globalAlpha = 0.9 * Math.min(1, Math.max(0, (zc - 3.6) / 2)); ctx.lineWidth = Math.max(1, 1.5 * rs); ctx.stroke();
+      ctx.strokeStyle = ink; ctx.globalAlpha = 0.8 * clamp01((zc - 3.6) / 2); ctx.lineWidth = Math.max(1, 1.1 * u); ctx.stroke();
     }
-    // Maßlinien mit Zahlen
-    if (rDims > 0) {
-      ctx.globalAlpha = rDims; ctx.strokeStyle = accent; ctx.fillStyle = accent; ctx.lineWidth = Math.max(1, 1.3 * rs);
-      ctx.font = '600 ' + Math.round(V.wide ? 12 * rs + 2 : 8.5 * rs + 1) + 'px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+
+    // 4) Plan-Elemente: Achsen, Maßketten, Höhenkoten, Schnitt, Maßstabsbalken
+    if (rPlan > 0) {
+      // Achsraster: Strich-Punkt-Linien mit Kreisen
+      ctx.setLineDash([10 * u, 3 * u, 2 * u, 3 * u]); ctx.strokeStyle = ink; ctx.globalAlpha = 0.4 * rPlan; ctx.lineWidth = Math.max(1, 0.8 * u);
       ctx.beginPath();
-      for (const d of draw.dims) {
-        const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
-        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
-        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L * 6 * rs, ny = dx / L * 6 * rs;
-        ctx.moveTo(a[0] - nx, a[1] - ny); ctx.lineTo(a[0] + nx, a[1] + ny);
-        ctx.moveTo(b[0] - nx, b[1] - ny); ctx.lineTo(b[0] + nx, b[1] + ny);
-      }
+      for (const a of draw.axes) { const p = P(a.p[0], a.p[1], a.p[2]), q = P(a.q[0], a.q[1], a.q[2]); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.globalAlpha = rPlan * (0.6 + 0.4 * detail);
+      for (const a of draw.axes) { const p = P(a.p[0], a.p[1], a.p[2]); circle(p[0], p[1], (wide ? 9 : 7) * u + 1, ink, a.label); }
+      // Maßhilfslinien
+      ctx.strokeStyle = accent; ctx.globalAlpha = rPlan * (0.25 + 0.45 * detail); ctx.lineWidth = Math.max(1, 0.7 * u);
+      ctx.beginPath();
+      for (const e of draw.ext) { const p = P(e[0], e[1], F), q = P(e[2], e[3], F); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
       ctx.stroke();
-      for (const d of draw.dims) {
+      // Schnittlinie A–A
+      const sc = draw.section;
+      if (sc) {
+        const p = P(sc.p[0], sc.p[1], sc.p[2]), q = P(sc.q[0], sc.q[1], sc.q[2]);
+        ctx.setLineDash([16 * u, 4 * u, 3 * u, 4 * u]); ctx.strokeStyle = ink; ctx.globalAlpha = 0.7 * rPlan; ctx.lineWidth = Math.max(1, 1.6 * u);
+        ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); ctx.setLineDash([]);
+        circle(p[0], p[1], 9 * u + 1, ink, sc.label); circle(q[0], q[1], 9 * u + 1, ink, sc.label);
+      }
+      // Maßstabsbalken mit Beschriftung
+      const bar = draw.bar;
+      if (bar) {
+        const n = Math.round(bar.len);
+        for (let i = 0; i < n; i++) {
+          const a = P(bar.o[0] + i, bar.o[1], bar.o[2]), b = P(bar.o[0] + i + 1, bar.o[1], bar.o[2]);
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+          ctx.strokeStyle = i % 2 ? halo : ink; ctx.globalAlpha = rPlan; ctx.lineWidth = 5 * u; ctx.stroke();
+          ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, 1.1 * u); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        }
+        const a0 = P(bar.o[0], bar.o[1], bar.o[2]), a1 = P(bar.o[0] + bar.len, bar.o[1], bar.o[2]);
+        ctx.globalAlpha = rPlan;
+        text('0', a0[0], a0[1] + 11 * u, ink, 9); text(Math.round(bar.len) + ' m', a1[0], a1[1] + 11 * u, ink, 9);
+        text(bar.caption, (a0[0] + a1[0]) / 2, a0[1] - 14 * u, ink, wide ? 10 : 8, '700');
+      }
+      // Nordpfeil (nur, wenn die Richtung bekannt ist)
+      if (draw.north && bar) {
+        const ang = draw.north.angle * Math.PI / 180, bx = bar.o[0] + bar.len + 2.2, by = bar.o[1];
+        const a = P(bx, by, F), b = P(bx + Math.sin(ang) * 2, by + Math.cos(ang) * 2, F);
+        ctx.globalAlpha = rPlan; ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, 1.6 * u);
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        circle(a[0], a[1], 5 * u, ink); text('N', b[0], b[1] - 8 * u, ink, 11, '800');
+      }
+    }
+
+    // 5) Maßketten mit Schrägstrich-Enden und Zahlen (feine Linien in der Akzentfarbe)
+    if (rDims > 0) {
+      const tick = 5 * u;
+      const items = [];
+      for (const d of draw.chains) { if (d.lvl === 1) items.push([d, rDims * (0.55 + 0.45 * detail)]); else items.push([d, rDims]); }
+      for (const d of draw.dims) items.push([d, rDims]);
+      ctx.strokeStyle = accent; ctx.lineWidth = Math.max(1, 0.95 * u);
+      for (const [d, al] of items) {
         const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
-        const mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2 - 7 * rs, label = d.label;
-        ctx.lineWidth = 4 * rs; ctx.strokeStyle = halo; ctx.strokeText(label, mx2, my2);
-        ctx.fillText(label, mx2, my2);
+        ctx.globalAlpha = al; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+        const sx = (ux - uy) * tick * 0.7, syy = (uy + ux) * tick * 0.7;   // 45°-Schrägstrich
+        ctx.moveTo(a[0] - sx, a[1] - syy); ctx.lineTo(a[0] + sx, a[1] + syy);
+        ctx.moveTo(b[0] - sx, b[1] - syy); ctx.lineTo(b[0] + sx, b[1] + syy);
+        ctx.stroke();
+      }
+      for (const [d, al] of items) {
+        const a = P(d.p[0], d.p[1], d.p[2]), b = P(d.q[0], d.q[1], d.q[2]);
+        const dist = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        if (d.lvl === 1 && dist < 26 * u) continue;   // zu kurze Teilmaße ausblenden
+        if (d.label.startsWith('First')) continue;   // die Höhe steht schon in der Kote
+        ctx.globalAlpha = al; text(d.label, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 7 * u, accent, wide ? 11 : 8.5);
+      }
+      // Höhenkoten: kleines Dreieck mit Höhenangabe
+      ctx.globalAlpha = rDims;
+      for (const k of draw.koten) {
+        const p = P(k.p[0], k.p[1], k.p[2]), s = 5 * u;
+        ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0] - s, p[1] - s * 1.5); ctx.lineTo(p[0] + s, p[1] - s * 1.5); ctx.closePath();
+        ctx.fillStyle = accent; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(p[0] - s * 3, p[1]); ctx.lineTo(p[0] + s * 3, p[1]); ctx.strokeStyle = accent; ctx.lineWidth = Math.max(1, 0.9 * u); ctx.stroke();
+        text(k.label, p[0] - s * 5.2, p[1] - s * 0.4, accent, wide ? 10 : 8);
       }
     }
     ctx.restore();
