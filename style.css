@@ -393,3 +393,9 @@ html[data-look] .site-footer .logo, html[data-look] .site-footer > p { display: 
 .cloud-ctrl .view-switch button { width: auto; height: auto; border-radius: 999px; font-size: .78rem; padding: .32rem .75rem; }
 .cloud-ctrl .view-switch button:hover { transform: none; }
 html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* Hinweis zur Ansicht (Scan / Zeichnung) */
+.cloud-ctrl { flex-wrap: nowrap; }
+.view-note { position: absolute; right: 0; bottom: 52px; width: 300px; margin: 0; text-align: right; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .72rem; line-height: 1.4; color: var(--muted); pointer-events: none; }
+.view-note.swap { animation: swap .6s var(--ease); }
+@media (max-width: 760px) { .view-note { display: none; } .view-switch .long { display: none; } }

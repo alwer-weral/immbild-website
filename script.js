@@ -178,11 +178,14 @@ nav.addEventListener('click', e => {
         walls.push(wob([s[0], s[1], F], [s[2], s[3], F]), wob([s[0], s[1], T], [s[2], s[3], T]));
         walls.push([[s[0], s[1], F], [s[0], s[1], T]], [[s[2], s[3], F], [s[2], s[3], T]]);
       }
-      j.roof.sort((p, q) => Math.min(p[0], p[3]) - Math.min(q[0], q[3]));
+      j.roofpoly.sort((p, q) => Math.min(...p.pts.map(a => a[0])) - Math.min(...q.pts.map(a => a[0])));
+      const levels = {};   // Dachflächen je Höhenstufe, damit sich die durchsichtigen Schichten stapeln
+      for (const r of j.roofsurf) (levels[r[4]] = levels[r[4]] || []).push(r);
+      const surf = Object.keys(levels).map(Number).sort((a, b) => a - b).map(z => ({ z, runs: levels[z].sort((p, q) => p[0] - q[0]) }));
       j.poche.sort((p, q) => p[0] - q[0]);
       j.hatch.sort((p, q) => p[0] - q[0]);
       draw = {
-        walls, roof: j.roof, floor: F, poche: j.poche, hatch: j.hatch,
+        walls, roofpoly: j.roofpoly, roofsurf: surf, shell: j.shell, top: T, floor: F, poche: j.poche, hatch: j.hatch,
         chains: j.chains, ext: j.ext, axes: j.axes, koten: j.koten, bar: j.bar, section: j.section, north: j.north,
         dims: j.dims.filter(d => d.label.startsWith('First'))
       };
@@ -292,18 +295,46 @@ nav.addEventListener('click', e => {
       for (let k = 1; k <= last && k < pts.length; k++) { p = P(pts[k][0], pts[k][1], pts[k][2]); ctx.lineTo(p[0], p[1]); }
     }
     ctx.strokeStyle = ink; ctx.globalAlpha = 0.6; ctx.lineWidth = Math.max(1, 1.15 * u); ctx.stroke();
+    // Hülle: Boden- und Wandkranz mit Eckpfosten, damit die Gebäude als geschlossenes Volumen lesbar sind
+    if (rWalls > 0.15) {
+      ctx.beginPath();
+      for (const s of draw.shell) {
+        const [x0, x1] = s.x, [y0, y1] = s.y, T = draw.top;
+        for (const z of [F, T]) {
+          const a = P(x0, y0, z), b = P(x1, y0, z), c = P(x1, y1, z), d = P(x0, y1, z);
+          ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
+        }
+        for (const [x, y] of [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]) { const a = P(x, y, F), b = P(x, y, T); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+      }
+      ctx.strokeStyle = ink; ctx.globalAlpha = 0.5 * clamp01((rWalls - 0.15) / 0.5); ctx.lineWidth = Math.max(1, 1.2 * u); ctx.stroke();
+    }
 
     // 3) Dach als Höhenlinien (dünn); sie lösen sich beim Hineinzoomen von oben nach unten auf
     if (rRoof > 0) {
-      const nR = draw.roof.length, shownR = rRoof * nR;
-      ctx.beginPath();
-      for (let i = 0; i < nR && i < shownR; i++) {
-        const s = draw.roof[i];
-        if (s[2] > zc) continue;
-        const a = P(s[0], s[1], s[2]), b = P(s[3], s[4], s[5]);
-        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      // durchsichtige Dachflächen: jede Höhenstufe ein dünner Schleier, zum First hin wird es dichter
+      for (const g of draw.roofsurf) {
+        const fade = clamp01((zc - g.z + 0.4) / 1.6);
+        if (fade <= 0) continue;
+        const n = Math.ceil(rRoof * g.runs.length);
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+          const q = g.runs[i], a = P(q[0], q[1], g.z), b = P(q[2], q[1], g.z), c = P(q[2], q[3], g.z), d = P(q[0], q[3], g.z);
+          ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
+        }
+        ctx.fillStyle = ink; ctx.globalAlpha = 0.085 * fade; ctx.fill();
       }
-      ctx.strokeStyle = ink; ctx.globalAlpha = 0.8 * clamp01((zc - 3.6) / 2); ctx.lineWidth = Math.max(1, 1.1 * u); ctx.stroke();
+      const nR = draw.roofpoly.length, shownR = rRoof * nR;
+      for (let i = 0; i < nR && i < shownR; i++) {
+        const r = draw.roofpoly[i];
+        const fade = clamp01((zc - r.z + 0.4) / 1.6);
+        if (fade <= 0) continue;
+        const frac = Math.min(1, shownR - i), last = Math.max(1, Math.ceil((r.pts.length - 1) * frac));
+        ctx.beginPath();
+        let p = P(r.pts[0][0], r.pts[0][1], r.z); ctx.moveTo(p[0], p[1]);
+        for (let k = 1; k <= last && k < r.pts.length; k++) { p = P(r.pts[k][0], r.pts[k][1], r.z); ctx.lineTo(p[0], p[1]); }
+        if (r.closed && frac >= 1) { ctx.closePath(); ctx.fillStyle = ink; ctx.globalAlpha = 0.07 * fade; ctx.fill(); }
+        ctx.strokeStyle = ink; ctx.globalAlpha = 0.9 * fade; ctx.lineWidth = Math.max(1, 1.8 * u); ctx.stroke();
+      }
     }
 
     // 4) Plan-Elemente: Achsen, Maßketten, Höhenkoten, Schnitt, Maßstabsbalken
@@ -400,6 +431,11 @@ nav.addEventListener('click', e => {
     const v = mpTarget === 1 ? 'zeichnung' : 'scan';
     if (v === lastView) return; lastView = v;
     viewBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+    const note = document.getElementById('viewNote');
+    if (note) {
+      note.classList.remove('swap'); void note.offsetWidth; note.classList.add('swap');
+      note.textContent = v === 'scan' ? 'Jeder Punkt ist eine Laser-Messung. Millionen davon ergeben das Modell.' : 'Aus den Messpunkten entsteht der Plan: Wände, Dach und Maße.';
+    }
   }
 
   function frame(t) {
