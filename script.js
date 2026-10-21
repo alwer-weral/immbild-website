@@ -95,43 +95,31 @@ nav.addEventListener('click', e => {
   }
   resize(); addEventListener('resize', resize);
   hero.addEventListener('pointermove', e => { mx = (e.clientX / innerWidth - .5) * 2; my = (e.clientY / innerHeight - .5) * 2; });
-  addEventListener('scroll', () => { scrollP = Math.min(1, scrollY / innerHeight); }, { passive: true });
 
-  /* Steuerung: Mausrad zoomt, Ziehen dreht, zwei Finger zoomen */
+  /* Steuerung: Scrollen zoomt (die Startansicht bleibt dabei stehen), Ziehen dreht */
   let zoom = 1, zoomT = 1, dragYaw = 0, dragPitch = 0;
   const dichte = new URLSearchParams(location.search).get('dichte');
   const ZMAX = 3.2, tip = $('.cloud-tip'), saveData = !!(navigator.connection && navigator.connection.saveData);
-  const clampZ = v => Math.max(1, Math.min(ZMAX, v));
   const used = () => { if (tip) tip.classList.add('used'); };
-  if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Zwei Finger: ins Haus zoomen · Wischen: drehen';
-  hero.addEventListener('wheel', e => {
-    if (e.ctrlKey || scrollY > 2) return;
-    // Oben auf der Seite: Rollen nach oben zoomt hinein, nach unten zuerst hinaus, danach scrollt die Seite normal
-    if (e.deltaY < 0 || zoomT > 1.001) { e.preventDefault(); zoomT = clampZ(zoomT * Math.exp(-e.deltaY * 0.0018)); used(); }
-  }, { passive: false });
-  const ptrs = new Map(); let pinch0 = 0, zoom0 = 1;
+  if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Nach unten wischen: ins Haus zoomen · seitlich: drehen';
+  const trackLen = () => Math.max(1, hero.offsetHeight - innerHeight);
+  const scrollProgress = () => Math.max(0, Math.min(1, scrollY / trackLen()));
+  let dragging = null;
   hero.addEventListener('pointerdown', e => {
     if (e.button > 0 || e.target.closest('a, button, input')) return;
-    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = zoomT; }
+    dragging = { id: e.pointerId, x: e.clientX, y: e.clientY };
   });
   hero.addEventListener('pointermove', e => {
-    const p = ptrs.get(e.pointerId); if (!p) return;
-    if (e.pointerType === 'mouse' && !(e.buttons & 1)) { ptrs.delete(e.pointerId); return; }
-    if (ptrs.size === 2) {
-      p.x = e.clientX; p.y = e.clientY;
-      const [a, b] = [...ptrs.values()];
-      if (pinch0) zoomT = clampZ(zoom0 * Math.hypot(a.x - b.x, a.y - b.y) / pinch0);
-      used(); return;
-    }
-    dragYaw += (e.clientX - p.x) * 0.006;
-    dragPitch = Math.max(-0.7, Math.min(0.45, dragPitch + (e.clientY - p.y) * 0.004));
-    p.x = e.clientX; p.y = e.clientY; used();
+    if (!dragging || dragging.id !== e.pointerId) return;
+    if (e.pointerType === 'mouse' && !(e.buttons & 1)) { dragging = null; return; }
+    dragYaw += (e.clientX - dragging.x) * 0.006;
+    dragPitch = Math.max(-0.7, Math.min(0.45, dragPitch + (e.clientY - dragging.y) * 0.004));
+    dragging.x = e.clientX; dragging.y = e.clientY; used();
   });
-  const endPtr = e => { ptrs.delete(e.pointerId); };
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => hero.addEventListener(ev, endPtr));
-  $('#zoomIn')?.addEventListener('click', () => { zoomT = clampZ(zoomT * 1.4); used(); });
-  $('#zoomOut')?.addEventListener('click', () => { zoomT = clampZ(zoomT / 1.4); used(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => hero.addEventListener(ev, e => { if (dragging && dragging.id === e.pointerId) dragging = null; }));
+  const nudge = dir => { scrollBy({ top: dir * trackLen() * 0.2, behavior: 'smooth' }); used(); };
+  $('#zoomIn')?.addEventListener('click', () => nudge(1));
+  $('#zoomOut')?.addEventListener('click', () => nudge(-1));
 
   function start() { if (!running && visible && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(hero);
@@ -213,6 +201,9 @@ nav.addEventListener('click', e => {
 
     const c = cloud, real = c.real;
     const half = real ? EA : 10;
+    scrollP = scrollProgress();
+    zoomT = 1 + (ZMAX - 1) * scrollP;
+    if (scrollP > 0.03) used();
     zoom += (zoomT - zoom) * 0.22;
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
