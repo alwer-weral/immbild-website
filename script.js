@@ -133,6 +133,15 @@ nav.addEventListener('click', e => {
     dragging.x = e.clientX; dragging.y = e.clientY; used();
   });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => hero.addEventListener(ev, e => { if (dragging && dragging.id === e.pointerId) dragging = null; }));
+  /* Pfeiltasten links/rechts drehen das Haus (hoch/runter zoomen über das normale Scrollen) */
+  let keyDir = 0;
+  const typing = t => t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable);
+  addEventListener('keydown', e => {
+    if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || typing(e.target) || !visible || scrollY > hero.offsetHeight) return;
+    keyDir = e.key === 'ArrowLeft' ? -1 : 1; used(); e.preventDefault();
+  });
+  addEventListener('keyup', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keyDir = 0; });
+  addEventListener('blur', () => { keyDir = 0; });
   const nudge = dir => { scrollBy({ top: dir * trackLen() * 0.2, behavior: 'smooth' }); used(); };
   $('#zoomIn')?.addEventListener('click', () => nudge(1));
   $('#zoomOut')?.addEventListener('click', () => nudge(-1));
@@ -562,6 +571,7 @@ nav.addEventListener('click', e => {
     if (!cloud || t - lastDraw < 32) return;  // höchstens etwa 30 Bilder pro Sekunde
     lastDraw = t;
     const dt = Math.min(80, t - last || 33); last = t;
+    if (keyDir) dragYaw += keyDir * dt * 0.0022;
     if (!reduceMotion) { sweep = Math.min(1, sweep + dt / 5200); yaw += dt * 0.00007; }
 
     const c = cloud, real = c.real;
@@ -663,7 +673,7 @@ if (!coarse && !reduceMotion) {
 }
 
 /* ---------- Rundgang-Viewer ---------- */
-const stage = $('#stage'), poster = $('#poster'), frameEl = $('#frame'), posterTitle = $('#posterTitle');
+const stage = $('#stage'), poster = $('#poster'), frameEl = $('#frame'), posterTitle = $('#posterTitle'), posterImg = $('#posterImg');
 let current = $('.vt.active').dataset.id;
 function resetViewer() {
   frameEl.hidden = true; frameEl.removeAttribute('src'); poster.hidden = false;
@@ -672,11 +682,13 @@ $$('.vt').forEach(btn => btn.addEventListener('click', () => {
   $$('.vt').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
   btn.classList.add('active'); btn.setAttribute('aria-selected', 'true');
   current = btn.dataset.id; posterTitle.textContent = btn.dataset.title;
+  if (posterImg && btn.dataset.img) { posterImg.src = btn.dataset.img; posterImg.alt = btn.dataset.alt || ''; }
   resetViewer();
 }));
 $('#play').addEventListener('click', () => {
   frameEl.src = `https://my.matterport.com/show/?m=${encodeURIComponent(current)}&play=1&qs=1`;
   frameEl.hidden = false; poster.hidden = true;
+  frameEl.addEventListener('load', () => frameEl.focus(), { once: true });   // Pfeiltasten gehen sofort im Rundgang
 });
 
 /* ---------- Zielgruppen ---------- */
@@ -709,31 +721,44 @@ function updateTimeline() {
 }
 addEventListener('scroll', updateTimeline, { passive: true }); updateTimeline();
 
-/* ---------- Konfigurator ---------- */
-const state = { type: 'Wohnung', size: 120, wants: new Set(['3D-Rundgang']) };
+/* ---------- Anfrage: Menü (Projekt zusammenstellen) und Formular in einem Weg ---------- */
+const state = { type: 'Wohnung', size: 120, wants: new Set(['3D-Rundgang']), touched: false };
 const sizeIn = $('#cfgSize'), sizeOut = $('#cfgSizeOut'), summary = $('#cfgSummary');
+const fObjekt = $('#fObjekt'), fFlaeche = $('#fFlaeche'), fWunsch = $('#fWunsch'), fSumm = $('#fSumm'), formSum = $('#formSum');
+const FORM_HINT = 'Oben können Sie Ihr Projekt zusammenstellen. Oder Sie schreiben uns einfach.';
 function plain() {
   const w = [...state.wants];
   const list = w.length ? w.slice(0, -1).join(', ') + (w.length > 1 ? ' und ' : '') + w.slice(-1) : 'noch keine Leistung gewählt';
   return { w, list };
 }
 function renderCfg() {
-  sizeOut.textContent = state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²';
-  const { list } = plain();
-  summary.innerHTML = `Ich plane ein Projekt für <mark>${state.type}</mark> mit etwa <mark>${state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²'}</mark> und wünsche <mark>${list}</mark>.`;
+  const sizeTxt = state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²';
+  sizeOut.textContent = sizeTxt;
+  const { w, list } = plain();
+  summary.innerHTML = `Ich plane ein Projekt für <mark>${state.type}</mark> mit etwa <mark>${sizeTxt}</mark> und wünsche <mark>${list}</mark>.`;
+  /* Die Auswahl geht nur mit, wenn sie angefasst wurde: als eigene Felder und als Satz in der Anfrage-Mail */
+  if (state.touched) {
+    fObjekt.value = state.type; fFlaeche.value = sizeTxt; fWunsch.value = w.join(', ');
+    fSumm.value = `Ich plane ein Projekt für ${state.type} mit etwa ${sizeTxt} und wünsche ${list}.`;
+    formSum.innerHTML = `<b>Ihre Auswahl:</b> ${state.type}, ${sizeTxt}, ${list}`;
+  } else {
+    fObjekt.value = fFlaeche.value = fWunsch.value = fSumm.value = '';
+    formSum.textContent = FORM_HINT;
+  }
 }
 $$('#cfgType .pill').forEach(b => b.addEventListener('click', () => {
-  $$('#cfgType .pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.type = b.dataset.v; renderCfg();
+  $$('#cfgType .pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.type = b.dataset.v; state.touched = true; renderCfg();
 }));
 $$('#cfgWants .pill').forEach(b => b.addEventListener('click', () => {
   b.classList.toggle('active');
-  b.classList.contains('active') ? state.wants.add(b.dataset.v) : state.wants.delete(b.dataset.v); renderCfg();
+  b.classList.contains('active') ? state.wants.add(b.dataset.v) : state.wants.delete(b.dataset.v); state.touched = true; renderCfg();
 }));
-sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; renderCfg(); });
-$('#cfgGo').addEventListener('click', () => {
-  const { list } = plain();
-  const size = state.size >= 1500 ? 'mehr als 1.500 m²' : state.size + ' m²';
-  $('#msgField').value = `Hallo immbild.,\n\nich plane ein Projekt: ${state.type}, ca. ${size}.\nGewünscht: ${list}.\n\nMeine Fragen und Wünsche:\n`;
+sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.touched = true; renderCfg(); });
+$('#cfgGo').addEventListener('click', e => {
+  e.preventDefault();
+  state.touched = true; renderCfg();
+  $('#kontakt').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  setTimeout(() => $('#form [name="name"]').focus({ preventScroll: true }), 650);
 });
 renderCfg();
 
@@ -746,6 +771,7 @@ form.addEventListener('submit', async e => {
     const res = await fetch('/', { method: 'POST', body: new FormData(form) });
     if (!res.ok) throw new Error(res.status);
     form.reset();
+    renderCfg();
     msg.textContent = 'Danke! Ihre Anfrage ist angekommen. Wir melden uns persönlich.';
   } catch (err) {
     msg.textContent = 'Das Senden hat nicht geklappt. Bitte schreiben Sie uns direkt an bastian.a.werner@immbild.de.';

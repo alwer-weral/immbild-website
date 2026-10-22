@@ -46,8 +46,8 @@ R.dataset.look=get()||sun();})();
     <a href="#leistungen">Leistungen</a>
     <a href="#technik">Technik</a>
     <a href="#ablauf">Ablauf</a>
-    <a href="#konfigurator">Projekt planen</a>
-    <a href="#kontakt" class="btn btn-sm magnetic">Anfrage</a>
+    <a href="#anfrage">Projekt planen</a>
+    <a href="#anfrage" class="btn btn-sm magnetic">Anfrage</a>
   </nav>
 </header>
 
@@ -65,7 +65,7 @@ R.dataset.look=get()||sun();})();
     <p class="hero-lead">Wir scannen Räume mit Matterport und Leica BLK und machen sie online begehbar. Für Käufer, Mieter und Gäste, rund um die Uhr, mit einem einzigen Link.</p>
     <div class="hero-cta">
       <a class="btn magnetic" href="#erleben">Rundgang erleben</a>
-      <a class="btn ghost magnetic" href="#konfigurator">Projekt planen</a>
+      <a class="btn ghost magnetic" href="#anfrage">Projekt planen</a>
     </div>
   </div>
   <div class="hud" aria-hidden="true">
@@ -77,6 +77,7 @@ R.dataset.look=get()||sun();})();
   </div>
   <div class="cloud-ctrl">
     <p class="view-note" id="viewNote" aria-live="polite"></p>
+    <span class="cloud-tip">Scrollen: ins Haus zoomen · Ziehen oder ← →: drehen</span>
     <div class="look" role="group" aria-label="Darstellung" title="Tagsüber Papier, nachts Blaupause – automatisch, bis Sie selbst wählen">
       <button type="button" data-look="papier" aria-pressed="true">Papier</button>
       <button type="button" data-look="blaupause" aria-pressed="false">Blaupause</button>
@@ -86,7 +87,6 @@ R.dataset.look=get()||sun();})();
       <button type="button" data-view="zeichnung" aria-pressed="false">Maße</button>
       <button type="button" data-view="real" aria-pressed="false">3D-Modell</button>
     </div>
-    <span class="cloud-tip">Scrollen: ins Haus zoomen · Ziehen: drehen</span>
     <button type="button" id="zoomOut" aria-label="Verkleinern">&minus;</button>
     <button type="button" id="zoomIn" aria-label="Vergrößern">+</button>
   </div>
@@ -120,29 +120,16 @@ R.dataset.look=get()||sun();})();
 
   <div class="viewer reveal" id="viewer">
     <div class="viewer-tabs" role="tablist" aria-label="Rundgänge">
-      <button role="tab" aria-selected="true" class="vt active" data-id="civzf5iH5pv" data-title="Projekt 2023" data-kind="Garage und Nebenräume">
+      <button role="tab" aria-selected="true" class="vt active" data-id="civzf5iH5pv" data-title="Projekt 2023" data-kind="Garage und Nebenräume" data-img="vorschau-civzf5iH5pv.jpg" data-alt="Vorschau des Rundgangs Projekt 2023: Garage mit Werkbank und Rolltor">
         <b>Projekt 2023</b><small>Garage und Nebenräume</small>
       </button>
-      <button role="tab" aria-selected="false" class="vt" data-id="sFFNBCnXWuj" data-title="Villa Demo" data-kind="Wohnobjekt mit Galerie">
+      <button role="tab" aria-selected="false" class="vt" data-id="sFFNBCnXWuj" data-title="Villa Demo" data-kind="Wohnobjekt mit Galerie" data-img="vorschau-sFFNBCnXWuj.jpg" data-alt="Vorschau des Rundgangs Villa Demo: Wohnzimmer mit Galerie und Wendeltreppe">
         <b>Villa Demo</b><small>Wohnobjekt mit Galerie</small>
       </button>
     </div>
     <div class="viewer-stage" id="stage">
       <div class="poster" id="poster">
-        <svg viewBox="0 0 800 450" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14181d"/><stop offset="1" stop-color="#07080a"/></linearGradient>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#f1d252" stroke-opacity=".08"/></pattern>
-          </defs>
-          <rect width="800" height="450" fill="url(#pg)"/><rect width="800" height="450" fill="url(#grid)"/>
-          <g class="dollhouse" fill="none" stroke="#f1d252" stroke-width="2" stroke-linejoin="round">
-            <path d="M400 110 560 190 400 270 240 190Z" stroke-opacity=".9"/>
-            <path d="M240 190V280L400 360V270M560 190V280L400 360" stroke-opacity=".7"/>
-            <path d="M320 150 480 230M480 150 320 230" stroke-opacity=".3"/>
-            <path d="M400 190 480 230 400 270 320 230Z" stroke-opacity=".5"/>
-            <path d="M240 280 400 360 560 280" stroke-opacity=".3"/>
-          </g>
-        </svg>
+        <img id="posterImg" src="vorschau-civzf5iH5pv.jpg" width="1280" height="720" loading="lazy" decoding="async" alt="Vorschau des Rundgangs Projekt 2023: Garage mit Werkbank und Rolltor">
         <div class="poster-ui">
           <span class="chip live"><i></i> LIVE 3D</span>
           <button class="play" id="play" aria-label="Rundgang starten"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
@@ -153,7 +140,8 @@ R.dataset.look=get()||sun();})();
       <iframe id="frame" title="3D-Rundgang" allow="fullscreen; xr-spatial-tracking; accelerometer; gyroscope" allowfullscreen loading="lazy" hidden></iframe>
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
     </div>
-    <p class="hint">Tipp: Im Rundgang können Sie zwischen Dollhouse-Ansicht, Grundriss und Begehung wechseln.</p>
+    <p class="hint"><b>Tipp:</b> Im Rundgang können Sie zwischen Dollhouse-Ansicht, Grundriss und Begehung wechseln.</p>
+    <p class="hint">Es geht auch mit der Tastatur: Die Pfeiltasten hoch und runter bewegen Sie vor und zurück, links und rechts drehen Sie sich um die eigene Achse. Klicken Sie dafür einmal in den Rundgang. Mit dem Mausrad zoomen Sie hinein und hinaus, genau wie bei der Grafik ganz oben.</p>
   </div>
 </section>
 
@@ -337,14 +325,30 @@ R.dataset.look=get()||sun();})();
   </ol>
 </section>
 
-<!-- KONFIGURATOR -->
-<section class="block" id="konfigurator">
+<!-- FAQ -->
+<section class="block" id="faq">
   <div class="head reveal">
-    <p class="kicker">06 · Projekt planen</p>
-    <h2>Stellen Sie Ihr Projekt <span class="grad">in 30 Sekunden zusammen.</span></h2>
-    <p class="sub">Keine Preisliste, kein Formularwald. Sie wählen, wir melden uns mit einem passenden Angebot.</p>
+    <p class="kicker">06 · Fragen</p>
+    <h2>Gut zu <span class="grad">wissen.</span></h2>
   </div>
-  <div class="config reveal">
+  <div class="faq reveal">
+    <details><summary>Was ist ein virtueller 3D-Rundgang?</summary><p>Ein Rundgang ist ein digitaler Zwilling Ihres Objekts. Besucher bewegen sich selbst durch die Räume, drehen den Blick und wechseln zwischen Begehung, Dollhouse-Ansicht und Grundriss. Alles läuft im Browser.</p></details>
+    <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
+    <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
+    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
+    <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
+    <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
+  </div>
+</section>
+
+<!-- ANFRAGE: Menü (Projekt zusammenstellen) und Formular in einem Weg -->
+<section class="block contact" id="anfrage">
+  <div class="head reveal">
+    <p class="kicker">07 · Anfrage</p>
+    <h2>Lassen Sie uns <span class="grad">Ihr Objekt betreten.</span></h2>
+    <p class="sub">Stellen Sie Ihr Projekt in 30 Sekunden zusammen und schreiben Sie uns dazu, was Ihnen wichtig ist. Keine Preisliste, kein Formularwald: Wir melden uns persönlich mit einem passenden Angebot.</p>
+  </div>
+  <div class="config reveal" id="konfigurator">
     <div class="cfg-col">
       <h3>Objektart</h3>
       <div class="pills" id="cfgType">
@@ -367,50 +371,19 @@ R.dataset.look=get()||sun();})();
     <div class="cfg-col sum">
       <h3>Ihre Anfrage</h3>
       <p class="summary" id="cfgSummary"></p>
-      <a href="#kontakt" class="btn magnetic" id="cfgGo">Mit diesen Angaben anfragen</a>
-      <small>Unverbindlich. Wir antworten persönlich.</small>
+      <a href="#kontakt" class="btn magnetic" id="cfgGo">Weiter zu Ihren Angaben ↓</a>
+      <small>Das Menü ist freiwillig. Sie können auch gleich unten schreiben. Unverbindlich, wir antworten persönlich.</small>
     </div>
   </div>
-</section>
-
-<!-- ÜBER UNS -->
-<section class="block alt" id="ueber-uns">
-  <div class="about reveal">
-    <p class="kicker">07 · Wir</p>
-    <blockquote>„Unsere Mission ist es, die beste Lösung für Sie als Kunde bereitzustellen.“</blockquote>
-    <div class="people">
-      <div class="person"><span class="mono">AW</span><div><b>Alexander Werner</b><small>immbild.de</small></div></div>
-    </div>
-    <p class="sub">Aus Erftstadt für Köln, Bonn, den Rhein-Erft-Kreis und die Eifel. Objekt-, Architektur- und Immobilienfotografie, dazu virtuelle Erlebnistouren, aus einer Hand.</p>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section class="block" id="faq">
-  <div class="head reveal">
-    <p class="kicker">08 · Fragen</p>
-    <h2>Gut zu <span class="grad">wissen.</span></h2>
-  </div>
-  <div class="faq reveal">
-    <details><summary>Was ist ein virtueller 3D-Rundgang?</summary><p>Ein Rundgang ist ein digitaler Zwilling Ihres Objekts. Besucher bewegen sich selbst durch die Räume, drehen den Blick und wechseln zwischen Begehung, Dollhouse-Ansicht und Grundriss. Alles läuft im Browser.</p></details>
-    <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
-    <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
-    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
-    <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
-    <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
-  </div>
-</section>
-
-<!-- KONTAKT -->
-<section class="block contact" id="kontakt">
-  <div class="head reveal">
-    <p class="kicker">09 · Kontakt</p>
-    <h2>Lassen Sie uns <span class="grad">Ihr Objekt betreten.</span></h2>
-  </div>
-  <div class="contact-grid">
+  <div class="contact-grid" id="kontakt">
     <form name="anfrage" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" class="form reveal" id="form">
       <input type="hidden" name="form-name" value="anfrage">
+      <input type="hidden" name="objektart" id="fObjekt">
+      <input type="hidden" name="flaeche" id="fFlaeche">
+      <input type="hidden" name="wunsch" id="fWunsch">
+      <input type="hidden" name="zusammenfassung" id="fSumm">
       <p hidden><label>Nicht ausfüllen: <input name="bot-field"></label></p>
+      <p class="form-sum" id="formSum" aria-live="polite">Oben können Sie Ihr Projekt zusammenstellen. Oder Sie schreiben uns einfach.</p>
       <div class="two">
         <label>Name<input name="name" required autocomplete="name"></label>
         <label>E-Mail<input type="email" name="email" required autocomplete="email"></label>
@@ -419,15 +392,21 @@ R.dataset.look=get()||sun();})();
         <label>Telefon (optional)<input type="tel" name="telefon" autocomplete="tel"></label>
         <label>Objektort (optional)<input name="ort" autocomplete="address-level2"></label>
       </div>
-      <label>Nachricht<textarea name="nachricht" id="msgField" rows="6" placeholder="Was möchten Sie zeigen?"></textarea></label>
+      <label>Möchten Sie noch etwas ergänzen?<textarea name="nachricht" id="msgField" rows="6" placeholder="Zum Beispiel: Termin, Besonderheiten, Fragen. Oder einfach: Was möchten Sie zeigen?"></textarea></label>
       <label class="file">Anhänge (optional)<input type="file" name="anhang" multiple></label>
       <label class="check"><input type="checkbox" name="datenschutz" required> <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzhinweise</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden.</span></label>
       <button class="btn magnetic" type="submit">Anfrage senden</button>
       <p class="msg" id="msg" role="status"></p>
     </form>
     <aside class="card-info reveal">
-      <h3>immbild.de</h3>
-      <p>Alexander Werner<br>Lechenicher Straße 4<br>50374 Erftstadt</p>
+      <div class="card-person">
+        <span class="avatar"><img src="alexander-werner.jpg" width="360" height="360" loading="lazy" decoding="async" alt="Gezeichnetes Porträt von Alexander Werner"></span>
+        <div><b>Alexander Werner</b><small>immbild.de</small></div>
+      </div>
+      <blockquote>„Unsere Mission ist es, die beste Lösung für Sie als Kunde bereitzustellen.“</blockquote>
+      <p>Objekt-, Architektur- und Immobilienfotografie, dazu virtuelle Erlebnistouren, aus einer Hand.</p>
+      <hr>
+      <p>Lechenicher Straße 4<br>50374 Erftstadt</p>
       <p><a href="tel:+4922354789201">+49 2235 4789201</a><br><a href="tel:+491636221719">+49 163 6221719</a></p>
       <p><a href="mailto:bastian.a.werner@immbild.de">bastian.a.werner@immbild.de</a></p>
       <hr>
