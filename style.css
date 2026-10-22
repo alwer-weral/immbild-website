@@ -40,7 +40,8 @@ p { margin: 0 0 1em; }
 .site-header { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
   padding: 1rem clamp(1rem, 4vw, 3rem); transition: background .3s, padding .3s, backdrop-filter .3s; }
 .site-header.scrolled { background: rgba(var(--bg-rgb), .94); border-bottom: 1px solid var(--line); padding-block: .6rem; }
-.logo { font-size: 1.7rem; font-weight: 800; letter-spacing: -.04em; text-decoration: none; }
+.logo { font-size: clamp(1.55rem, 6.2vw, 3.4rem); font-weight: 800; letter-spacing: -.04em; text-decoration: none; line-height: 1; transition: font-size .25s ease; }
+.site-header.scrolled .logo { font-size: clamp(1.5rem, 5.5vw, 2.4rem); }
 .logo b { color: var(--ink); } .logo i { color: var(--gold); font-style: normal; }
 nav { display: flex; align-items: center; gap: 1.6rem; }
 nav a { text-decoration: none; color: var(--muted); font-weight: 500; font-size: .95rem; transition: color .2s; }
@@ -389,9 +390,13 @@ html[data-look] .site-footer .logo, html[data-look] .site-footer > p { display: 
 }
 
 /* Schalter Scan | Zeichnung im Hero */
-.cloud-ctrl .view-switch { margin-right: .4rem; background: rgba(var(--bg-rgb), .82); }
-.cloud-ctrl .view-switch button { width: auto; height: auto; border-radius: 999px; font-size: .78rem; padding: .32rem .75rem; }
-.cloud-ctrl .view-switch button:hover { transform: none; }
+.cloud-ctrl .look { margin-right: .4rem; background: rgba(var(--bg-rgb), .82); }
+.cloud-ctrl .look button { width: auto; height: auto; border-radius: 999px; font-size: .78rem; padding: .32rem .75rem; }
+.cloud-ctrl .look button:hover { transform: none; }
+/* Papier | Blaupause sitzt oben im Kopf nur, wenn man den Anfang der Seite verlassen hat; am Anfang liegt er in der Leiste unten */
+#header .look { display: none; }
+html.off-hero #header .look { display: inline-flex; }
+@media (max-width: 1240px) { .cloud-tip { display: none; } }
 html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 
 /* Hinweis zur Ansicht (Scan / Zeichnung) */
@@ -405,4 +410,25 @@ html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look
 #realcanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity .7s; pointer-events: none; }
 .hero.real #realcanvas { opacity: 1; }
 .hero.real #cloud { opacity: 0; }
-@media (max-width: 760px) { .cloud-ctrl { left: 1rem; right: 1rem; justify-content: flex-end; flex-wrap: wrap; gap: .4rem; } .cloud-ctrl .view-switch { margin-right: 0; } }
+/* Bedienleiste: links bündig unter dem Logo, Plus/Minus rechts */
+.cloud-ctrl { left: clamp(1rem, 4vw, 3rem); justify-content: flex-start; }
+.cloud-ctrl #zoomOut { margin-left: auto; }
+.cloud-tip { margin: 0 0 0 .4rem; }
+.view-note { left: 0; right: auto; text-align: left; }
+@media (max-width: 760px) {
+  .cloud-ctrl { right: clamp(1rem, 4vw, 3rem); top: calc(2rem + clamp(1.55rem, 6.2vw, 3.4rem) + .5rem); display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: .45rem; }
+  .cloud-ctrl .look { margin: 0; order: 0; }
+  .cloud-ctrl .look:not(.view-switch) { grid-column: 1; grid-row: 1; }
+  .cloud-ctrl .view-switch { grid-column: 2; grid-row: 1; justify-self: start; }
+  .cloud-ctrl #zoomOut { grid-column: 4; grid-row: 1; margin: 0; }
+  .cloud-ctrl #zoomIn { grid-column: 5; grid-row: 1; }
+  .cloud-ctrl .look button { font-size: .72rem; padding: .3rem .55rem; } .cloud-ctrl > button { width: 34px; height: 34px; }
+}
+/* schmales Handy: passt nicht in eine Zeile, der Dreier-Schalter rutscht darunter */
+@media (max-width: 560px) {
+  .cloud-ctrl { grid-template-columns: auto 1fr auto auto; }
+  .cloud-ctrl .view-switch { grid-column: 1 / 3; grid-row: 2; }
+  .cloud-ctrl #zoomOut { grid-column: 3; }
+  .cloud-ctrl #zoomIn { grid-column: 4; }
+}
+

@@ -11,7 +11,23 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23f1d252' stroke-width='3'/%3E%3Cpath d='M16 10v6h5' fill='none' stroke='%23f1d252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-  <script>try{var q=new URLSearchParams(location.search).get('look');if(q==='nacht')q='blaupause';if(q==='papier'||q==='blaupause')localStorage.setItem('look',q);var l=q||localStorage.getItem('look')||'papier';if(l==='nacht')l='blaupause';document.documentElement.dataset.look=(l==='blaupause')?'blaupause':'papier';}catch(e){}</script>
+  <script>
+/* Darstellung: tagsüber Papier, nachts Blaupause (nach der Sonne über Erftstadt), außer man hat selbst gewählt (gilt für diesen Besuch) */
+(function(){var R=document.documentElement,S=null,mem=null;try{S=window.sessionStorage;S.getItem('look');}catch(e){S=null;}
+function get(){var v=null;try{v=S?S.getItem('look'):mem;}catch(e){v=mem;}return(v==='papier'||v==='blaupause')?v:null;}
+function set(v){mem=v;try{if(S)S.setItem('look',v);}catch(e){}}
+function sun(d){d=d||new Date();var r=Math.PI/180,lat=50.83*r,lng=6.8,
+n=Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-Date.UTC(d.getUTCFullYear(),0,0))/864e5),g=2*Math.PI/365*(n-1),
+eq=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g)),
+dc=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g),
+ha=Math.acos(Math.cos(90.833*r)/(Math.cos(lat)*Math.cos(dc))-Math.tan(lat)*Math.tan(dc))/r,
+noon=720-4*lng-eq,m=d.getUTCHours()*60+d.getUTCMinutes()+d.getUTCSeconds()/60;
+return(m>=noon-4*ha&&m<noon+4*ha)?'papier':'blaupause';}
+var q=new URLSearchParams(location.search).get('look');if(q==='nacht')q='blaupause';
+if(q==='auto'){mem=null;try{if(S)S.removeItem('look');}catch(e){}}else if(q==='papier'||q==='blaupause')set(q);
+window.immLook={sun:sun,manual:get,set:set};
+R.dataset.look=get()||sun();})();
+</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,8 +35,8 @@
 <a class="skip" href="#main">Zum Inhalt springen</a>
 
 <header class="site-header" id="header">
-  <a class="logo" href="#top" aria-label="immbild. Startseite">imm<b>bild</b><i>.</i></a>
-  <div class="look" role="group" aria-label="Darstellung">
+  <a class="logo" href="#top" aria-label="immbild.de Startseite">imm<b>bild</b><i>.de</i></a>
+  <div class="look" role="group" aria-label="Darstellung" title="Tagsüber Papier, nachts Blaupause – automatisch, bis Sie selbst wählen">
     <button type="button" data-look="papier" aria-pressed="true">Papier</button>
     <button type="button" data-look="blaupause" aria-pressed="false">Blaupause</button>
   </div>
@@ -55,14 +71,20 @@
   <div class="hud" aria-hidden="true">
     <div class="hud-row"><span>SCAN</span><b id="hudPct">000</b><span>%</span></div>
     <div class="hud-bar"><i id="hudBar"></i></div>
+    <div class="hud-row"><span>ZOOM</span><b id="hudZoom">100</b><span>%</span></div>
+    <div class="hud-bar"><i id="hudZoomBar"></i></div>
     <div class="hud-row small"><span>PUNKTE</span><b id="hudPts">0</b></div>
   </div>
   <div class="cloud-ctrl">
     <p class="view-note" id="viewNote" aria-live="polite"></p>
+    <div class="look" role="group" aria-label="Darstellung" title="Tagsüber Papier, nachts Blaupause – automatisch, bis Sie selbst wählen">
+      <button type="button" data-look="papier" aria-pressed="true">Papier</button>
+      <button type="button" data-look="blaupause" aria-pressed="false">Blaupause</button>
+    </div>
     <div class="look view-switch" role="group" aria-label="Ansicht">
-      <button type="button" data-view="scan" aria-pressed="true">Punktwolke</button>
-      <button type="button" data-view="zeichnung" aria-pressed="false">Zeichnung</button>
-      <button type="button" data-view="real" aria-pressed="false">Real Estate</button>
+      <button type="button" data-view="scan" aria-pressed="true">Scanner-Punkte</button>
+      <button type="button" data-view="zeichnung" aria-pressed="false">Maße</button>
+      <button type="button" data-view="real" aria-pressed="false">3D-Modell</button>
     </div>
     <span class="cloud-tip">Scrollen: ins Haus zoomen · Ziehen: drehen</span>
     <button type="button" id="zoomOut" aria-label="Verkleinern">&minus;</button>
@@ -424,7 +446,7 @@
     <div><small>Stand</small><span id="tbDate">2026</span></div>
     <div><small>Blatt</small>1 / 1</div>
   </div>
-  <a class="logo" href="#top">imm<b>bild</b><i>.</i></a>
+  <a class="logo" href="#top">imm<b>bild</b><i>.de</i></a>
   <p>Alexander Werner · Lechenicher Straße 4 · 50374 Erftstadt</p>
   <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="#top">Nach oben ↑</a></p>
 </footer>

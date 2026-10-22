@@ -8,6 +8,13 @@ const header = $('#header');
 const nav = $('#nav');
 const toggle = $('.nav-toggle');
 addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 30), { passive: true });
+/* Papier | Blaupause wandert in den Kopf, sobald die Hero-Leiste aus dem Bild ist */
+(function offHero() {
+  const top = document.getElementById('top');
+  const root = document.documentElement;
+  if (!top || !('IntersectionObserver' in window)) { root.classList.add('off-hero'); return; }
+  new IntersectionObserver(([e]) => root.classList.toggle('off-hero', !e.isIntersecting)).observe(top);
+})();
 toggle.addEventListener('click', () => {
   const open = nav.classList.toggle('open');
   toggle.setAttribute('aria-expanded', open);
@@ -27,7 +34,7 @@ nav.addEventListener('click', e => {
   const canvas = $('#cloud');
   const ctx = canvas.getContext('2d');
   const hero = $('.hero');
-  const hudPct = $('#hudPct'), hudBar = $('#hudBar'), hudPts = $('#hudPts');
+  const hudPct = $('#hudPct'), hudBar = $('#hudBar'), hudPts = $('#hudPts'), hudZoom = $('#hudZoom'), hudZoomBar = $('#hudZoomBar');
   const REAL_POINTS = 16386303;            // Punkte des echten Scan-Ausschnitts, nur für die Anzeige
   const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -100,6 +107,15 @@ nav.addEventListener('click', e => {
   let zoom = 1, zoomT = 1, dragYaw = 0, dragPitch = 0;
   const dichte = new URLSearchParams(location.search).get('dichte');
   const ZMAX = 3.2, tip = $('.cloud-tip'), saveData = !!(navigator.connection && navigator.connection.saveData);
+  /* Zoom-Anzeige im Scan-Kasten: 100 % = Startansicht, mit dem Scrollen bis ZMAX */
+  let hudZLast = -1;
+  const hudZ = () => {
+    const v = Math.round(zoom * 100);
+    if (v === hudZLast || !hudZoom) return;
+    hudZLast = v;
+    hudZoom.textContent = String(v).padStart(3, '0');
+    hudZoomBar.style.width = Math.max(0, Math.min(1, (zoom - 1) / (ZMAX - 1))) * 100 + '%';
+  };
   const used = () => { if (tip) tip.classList.add('used'); };
   if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Nach unten wischen: ins Haus zoomen · seitlich: drehen';
   const trackLen = () => Math.max(1, hero.offsetHeight - innerHeight);
@@ -510,7 +526,7 @@ nav.addEventListener('click', e => {
   const realBtn = $('.view-switch [data-view="real"]');
   if (!initGL() && realBtn) realBtn.hidden = true;     // ohne WebGL gibt es die Ansicht nicht
 
-  /* Schalter Punktwolke | Zeichnung | Real Estate */
+  /* Schalter Scanner-Punkte | Maße | 3D-Modell */
   const viewBtns = $$('.view-switch button');
   const hero2 = hero;
   viewBtns.forEach(b => b.addEventListener('click', async () => {
@@ -518,8 +534,8 @@ nav.addEventListener('click', e => {
     morphAuto = false; used();
     if (v === 'real') {
       const note = document.getElementById('viewNote');
-      if (!glCount && note) note.textContent = 'Real Estate wird geladen …';
-      if (!(await loadRealGL())) { if (note) note.textContent = 'Real Estate ist hier gerade nicht verfügbar.'; return; }
+      if (!glCount && note) note.textContent = '3D-Modell wird geladen …';
+      if (!(await loadRealGL())) { if (note) note.textContent = 'Das 3D-Modell ist hier gerade nicht verfügbar.'; return; }
       showReal = true; hero2.classList.add('real'); lastView = '';
       return;
     }
@@ -554,6 +570,7 @@ nav.addEventListener('click', e => {
     zoomT = 1 + (ZMAX - 1) * scrollP;
     if (scrollP > 0.03) used();
     zoom += (zoomT - zoom) * 0.22;
+    hudZ();
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
     const pitch = Math.max(0.3, Math.min(1.5, (showReal ? 0.92 : (real ? 1.08 : 0.5)) + dragPitch + my * 0.08 - scrollP * 0.25));
@@ -748,8 +765,14 @@ form.addEventListener('submit', async e => {
   apply(root.dataset.look === 'blaupause' ? 'blaupause' : 'papier');
   btns.forEach(b => b.addEventListener('click', () => {
     apply(b.dataset.look);
-    try { localStorage.setItem('look', b.dataset.look); } catch (e) {}
+    if (window.immLook) window.immLook.set(b.dataset.look);
   }));
+  /* Automatik: Tag = Papier, Nacht = Blaupause, solange niemand selbst gewählt hat (auch wenn die Seite über den Sonnenuntergang offen bleibt) */
+  if (window.immLook) setInterval(() => {
+    if (window.immLook.manual()) return;
+    const m = window.immLook.sun();
+    if (m !== root.dataset.look) apply(m);
+  }, 60000);
   const d = $('#tbDate');
   if (d) d.textContent = new Date().toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' });
 })();
