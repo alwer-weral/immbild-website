@@ -325,57 +325,45 @@ R.dataset.look=get()||sun();})();
   </ol>
 </section>
 
-<!-- FAQ -->
-<section class="block" id="faq">
-  <div class="head reveal">
-    <p class="kicker">06 · Fragen</p>
-    <h2>Gut zu <span class="grad">wissen.</span></h2>
-  </div>
-  <div class="faq reveal">
-    <details><summary>Was ist ein virtueller 3D-Rundgang?</summary><p>Ein Rundgang ist ein digitaler Zwilling Ihres Objekts. Besucher bewegen sich selbst durch die Räume, drehen den Blick und wechseln zwischen Begehung, Dollhouse-Ansicht und Grundriss. Alles läuft im Browser.</p></details>
-    <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
-    <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
-    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
-    <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
-    <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
-  </div>
-</section>
-
 <!-- ANFRAGE: Menü (Projekt zusammenstellen) und Formular in einem Weg -->
 <section class="block contact" id="anfrage">
   <div class="head reveal">
-    <p class="kicker">07 · Anfrage</p>
+    <p class="kicker">06 · Anfrage</p>
     <h2>Lassen Sie uns <span class="grad">Ihr Objekt betreten.</span></h2>
     <p class="sub">Stellen Sie Ihr Projekt in 30 Sekunden zusammen und schreiben Sie uns dazu, was Ihnen wichtig ist. Keine Preisliste, kein Formularwald: Wir melden uns persönlich mit einem passenden Angebot.</p>
   </div>
-  <div class="config reveal" id="konfigurator">
-    <div class="cfg-col">
-      <h3>Objektart</h3>
-      <div class="pills" id="cfgType">
-        <button class="pill active" data-v="Wohnung">Wohnung</button>
-        <button class="pill" data-v="Haus">Haus</button>
-        <button class="pill" data-v="Unterkunft / Ferienobjekt">Unterkunft</button>
-        <button class="pill" data-v="Gewerbe / Büro">Gewerbe</button>
-        <button class="pill" data-v="Hotel / Gastronomie">Hotel</button>
-      </div>
-      <h3>Größe: <output id="cfgSizeOut">120 m²</output></h3>
-      <input type="range" id="cfgSize" min="20" max="1500" step="10" value="120" aria-label="Wohn- bzw. Nutzfläche in Quadratmetern">
-      <h3>Gewünscht</h3>
-      <div class="pills multi" id="cfgWants">
-        <button class="pill active" data-v="3D-Rundgang">3D-Rundgang</button>
-        <button class="pill" data-v="Immobilienfotos">Fotos</button>
-        <button class="pill" data-v="Grundriss und Maße">Grundriss</button>
-        <button class="pill" data-v="Architekturaufnahmen">Architektur</button>
-      </div>
-    </div>
-    <div class="cfg-col sum">
-      <h3>Ihre Anfrage</h3>
-      <p class="summary" id="cfgSummary"></p>
-      <a href="#kontakt" class="btn magnetic" id="cfgGo">Weiter zu Ihren Angaben ↓</a>
-      <small>Das Menü ist freiwillig. Sie können auch gleich unten schreiben. Unverbindlich, wir antworten persönlich.</small>
-    </div>
-  </div>
   <div class="contact-grid" id="kontakt">
+   <div class="anfrage-main">
+    <div class="config reveal" id="konfigurator">
+      <div class="cfg-col">
+        <h3>Objektart</h3>
+        <div class="pills" id="cfgType">
+          <button class="pill active" data-v="Wohnung">Wohnung</button>
+          <button class="pill" data-v="Haus">Haus</button>
+          <button class="pill" data-v="Unterkunft / Ferienobjekt">Unterkunft</button>
+          <button class="pill" data-v="Gewerbe / Büro">Gewerbe</button>
+          <button class="pill" data-v="Hotel / Gastronomie">Hotel</button>
+          <button class="pill" data-v="Sonstiges">Sonstiges</button>
+        </div>
+        <div class="cfg-other" id="cfgOther" hidden>
+          <label for="cfgOtherText">Worum geht es?</label>
+          <input id="cfgOtherText" type="text" maxlength="120" autocomplete="off" placeholder="Event, Museum, Fahrzeug, Autohaus …">
+        </div>
+        <h3>Größe: <output id="cfgSizeOut">120 m²</output></h3>
+        <input type="range" id="cfgSize" min="20" max="1500" step="10" value="120" aria-label="Wohn- bzw. Nutzfläche in Quadratmetern">
+        <h3>Gewünscht</h3>
+        <div class="pills multi" id="cfgWants">
+          <button class="pill active" data-v="3D-Rundgang">3D-Rundgang</button>
+          <button class="pill" data-v="Immobilienfotos">Fotos</button>
+          <button class="pill" data-v="Grundriss und Maße">Grundriss</button>
+          <button class="pill" data-v="Architekturaufnahmen">Architektur</button>
+        </div>
+        <div class="cfg-go">
+          <a href="#form" class="btn magnetic" id="cfgGo">Weiter zu Ihren Angaben ↓</a>
+          <small>Das Menü ist freiwillig, Sie können auch gleich unten schreiben. Unverbindlich, wir antworten persönlich.</small>
+        </div>
+      </div>
+    </div>
     <form name="anfrage" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" class="form reveal" id="form">
       <input type="hidden" name="form-name" value="anfrage">
       <input type="hidden" name="objektart" id="fObjekt">
@@ -398,6 +386,7 @@ R.dataset.look=get()||sun();})();
       <button class="btn magnetic" type="submit">Anfrage senden</button>
       <p class="msg" id="msg" role="status"></p>
     </form>
+   </div>
     <aside class="card-info reveal">
       <div class="card-person">
         <span class="avatar"><img src="alexander-werner.jpg" width="360" height="360" loading="lazy" decoding="async" alt="Gezeichnetes Porträt von Alexander Werner"></span>
@@ -415,13 +404,29 @@ R.dataset.look=get()||sun();})();
   </div>
 </section>
 
+<!-- FAQ -->
+<section class="block" id="faq">
+  <div class="head reveal">
+    <p class="kicker">07 · Fragen</p>
+    <h2>Gut zu <span class="grad">wissen.</span></h2>
+  </div>
+  <div class="faq reveal">
+    <details><summary>Was ist ein virtueller 3D-Rundgang?</summary><p>Ein Rundgang ist ein digitaler Zwilling Ihres Objekts. Besucher bewegen sich selbst durch die Räume, drehen den Blick und wechseln zwischen Begehung, Dollhouse-Ansicht und Grundriss. Alles läuft im Browser.</p></details>
+    <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
+    <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
+    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
+    <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
+    <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
+  </div>
+</section>
+
 </main>
 
 <footer class="site-footer">
   <div class="titleblock" aria-hidden="true">
-    <div><small>Projekt</small>immbild. Website</div>
+    <div><small>Projekt</small>immbild.de Webseite</div>
     <div><small>Maßstab</small>1 : 1</div>
-    <div><small>Gezeichnet</small>A. Werner</div>
+    <div><small>Gezeichnet</small>Alexander Werner</div>
     <div><small>Stand</small><span id="tbDate">2026</span></div>
     <div><small>Blatt</small>1 / 1</div>
   </div>

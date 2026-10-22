@@ -722,10 +722,12 @@ function updateTimeline() {
 addEventListener('scroll', updateTimeline, { passive: true }); updateTimeline();
 
 /* ---------- Anfrage: Menü (Projekt zusammenstellen) und Formular in einem Weg ---------- */
-const state = { type: 'Wohnung', size: 120, wants: new Set(['3D-Rundgang']), touched: false };
-const sizeIn = $('#cfgSize'), sizeOut = $('#cfgSizeOut'), summary = $('#cfgSummary');
+const state = { type: 'Wohnung', other: '', size: 120, wants: new Set(['3D-Rundgang']), touched: false };
+const sizeIn = $('#cfgSize'), sizeOut = $('#cfgSizeOut');
+const otherBox = $('#cfgOther'), otherIn = $('#cfgOtherText');
 const fObjekt = $('#fObjekt'), fFlaeche = $('#fFlaeche'), fWunsch = $('#fWunsch'), fSumm = $('#fSumm'), formSum = $('#formSum');
 const FORM_HINT = 'Oben können Sie Ihr Projekt zusammenstellen. Oder Sie schreiben uns einfach.';
+const esc = t => t.replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function plain() {
   const w = [...state.wants];
   const list = w.length ? w.slice(0, -1).join(', ') + (w.length > 1 ? ' und ' : '') + w.slice(-1) : 'noch keine Leistung gewählt';
@@ -734,21 +736,25 @@ function plain() {
 function renderCfg() {
   const sizeTxt = state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²';
   sizeOut.textContent = sizeTxt;
+  const type = state.type === 'Sonstiges' && state.other ? `Sonstiges: ${state.other}` : state.type;
   const { w, list } = plain();
-  summary.innerHTML = `Ich plane ein Projekt für <mark>${state.type}</mark> mit etwa <mark>${sizeTxt}</mark> und wünsche <mark>${list}</mark>.`;
   /* Die Auswahl geht nur mit, wenn sie angefasst wurde: als eigene Felder und als Satz in der Anfrage-Mail */
   if (state.touched) {
-    fObjekt.value = state.type; fFlaeche.value = sizeTxt; fWunsch.value = w.join(', ');
-    fSumm.value = `Ich plane ein Projekt für ${state.type} mit etwa ${sizeTxt} und wünsche ${list}.`;
-    formSum.innerHTML = `<b>Ihre Auswahl:</b> ${state.type}, ${sizeTxt}, ${list}`;
+    fObjekt.value = type; fFlaeche.value = sizeTxt; fWunsch.value = w.join(', ');
+    fSumm.value = `Ich plane ein Projekt für ${type} mit etwa ${sizeTxt} und wünsche ${list}.`;
+    formSum.innerHTML = `<b>Ihre Auswahl:</b> ${esc(type)}, ${sizeTxt}, ${list}`;
   } else {
     fObjekt.value = fFlaeche.value = fWunsch.value = fSumm.value = '';
     formSum.textContent = FORM_HINT;
   }
 }
 $$('#cfgType .pill').forEach(b => b.addEventListener('click', () => {
-  $$('#cfgType .pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.type = b.dataset.v; state.touched = true; renderCfg();
+  $$('#cfgType .pill').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.type = b.dataset.v; state.touched = true;
+  otherBox.hidden = state.type !== 'Sonstiges';          // bei „Sonstiges" öffnet sich ein Feld für die nähere Beschreibung
+  if (!otherBox.hidden) otherIn.focus({ preventScroll: true });
+  renderCfg();
 }));
+otherIn.addEventListener('input', () => { state.other = otherIn.value.trim(); state.touched = true; renderCfg(); });
 $$('#cfgWants .pill').forEach(b => b.addEventListener('click', () => {
   b.classList.toggle('active');
   b.classList.contains('active') ? state.wants.add(b.dataset.v) : state.wants.delete(b.dataset.v); state.touched = true; renderCfg();
@@ -757,7 +763,7 @@ sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.touch
 $('#cfgGo').addEventListener('click', e => {
   e.preventDefault();
   state.touched = true; renderCfg();
-  $('#kontakt').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  $('#form').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   setTimeout(() => $('#form [name="name"]').focus({ preventScroll: true }), 650);
 });
 renderCfg();
