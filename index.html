@@ -157,7 +157,6 @@ R.dataset.look=get()||sun();})();
       <span class="num">01</span>
       <h3>Virtuelle 3D-Rundgänge</h3>
       <p>Raum für Raum erfasst, millimetergenau zusammengesetzt und online begehbar. Mit Dollhouse-Ansicht und Grundriss. Der Rundgang lässt sich in Exposés, Portale und die eigene Website einbinden.</p>
-      <svg class="art" viewBox="0 0 200 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M100 14 170 50 100 86 30 50Z"/><path d="M30 50v34l70 34V86M170 50v34l-70 34"/><path d="M65 32 135 68M135 32 65 68" opacity=".35"/></g></svg>
     </article>
     <article class="tile tilt reveal">
       <span class="num">02</span>
@@ -174,10 +173,16 @@ R.dataset.look=get()||sun();})();
       <h3>Einbindung und Weitergabe</h3>
       <p>Ein Link genügt: für Ihr Exposé, Ihr Portal, Ihre Website oder die Mail an Interessenten. Auf Anfrage unterstützen wir bei der Einbindung.</p>
     </article>
-    <article class="tile tilt reveal">
-      <span class="num">05</span>
-      <h3>Grundriss und Maße</h3>
-      <p>Optional zum Rundgang dazubuchbar: Aus dem Matterport-Scan entstehen Grundrisse und Abmessungen Ihres Objekts.</p>
+    <article class="tile band reveal" id="wmBand">
+      <div class="band-text">
+        <span class="num">05</span>
+        <h3>Aus Maßen wird ein Modell</h3>
+        <p>Grundriss und Maße gibt es optional zum Rundgang dazu: Aus dem Matterport-Scan entstehen Grundrisse und Abmessungen Ihres Objekts. Hier sehen Sie, wie aus Grundrissen und Schnitten Geschoss für Geschoss ein Modell wird.</p>
+        <p class="band-note"><span id="wmCap" aria-live="polite"></span><span class="band-hint">Beispiel aus Bauzeichnungen. Ziehen dreht das Haus.</span></p>
+      </div>
+      <div class="band-art">
+        <canvas id="wm" role="img" aria-label="Animiertes Drahtmodell eines Wohnhauses: baut sich Geschoss für Geschoss aus Grundrissen auf und dreht sich"></canvas>
+      </div>
     </article>
   </div>
 </section>
@@ -333,8 +338,8 @@ R.dataset.look=get()||sun();})();
     <p class="sub">Stellen Sie Ihr Projekt in 30 Sekunden zusammen und schreiben Sie uns dazu, was Ihnen wichtig ist. Keine Preisliste, kein Formularwald: Wir melden uns persönlich mit einem passenden Angebot.</p>
   </div>
   <div class="contact-grid" id="kontakt">
-   <div class="anfrage-main">
-    <div class="config reveal" id="konfigurator">
+   <div class="anfrage-main anfrage-box reveal">
+    <div class="config" id="konfigurator">
       <div class="cfg-col">
         <h3>Objektart</h3>
         <div class="pills" id="cfgType">
@@ -358,13 +363,10 @@ R.dataset.look=get()||sun();})();
           <button class="pill" data-v="Grundriss und Maße">Grundriss</button>
           <button class="pill" data-v="Architekturaufnahmen">Architektur</button>
         </div>
-        <div class="cfg-go">
-          <a href="#form" class="btn magnetic" id="cfgGo">Weiter zu Ihren Angaben ↓</a>
-          <small>Das Menü ist freiwillig, Sie können auch gleich unten schreiben. Unverbindlich, wir antworten persönlich.</small>
-        </div>
+        <p class="cfg-note">Das Menü ist freiwillig, Sie können auch gleich unten schreiben. Unverbindlich, wir antworten persönlich.</p>
       </div>
     </div>
-    <form name="anfrage" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" class="form reveal" id="form">
+    <form name="anfrage" method="POST" action="/danke.html" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" class="form" id="form">
       <input type="hidden" name="form-name" value="anfrage">
       <input type="hidden" name="objektart" id="fObjekt">
       <input type="hidden" name="flaeche" id="fFlaeche">

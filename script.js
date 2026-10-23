@@ -672,6 +672,37 @@ if (!coarse && !reduceMotion) {
   });
 }
 
+/* ---------- Drahtmodell im Band „Aus Maßen wird ein Modell" ---------- */
+(function wireframe() {
+  const band = $('#wmBand'), canvas = $('#wm'), cap = $('#wmCap');
+  if (!band || !canvas) return;
+  let model = null, loading = false;
+  /* Schwache Geräte, Datensparmodus und „weniger Bewegung": nur das fertige Standbild, einmal gezeichnet */
+  const weak = reduceMotion || !!(navigator.connection && navigator.connection.saveData)
+    || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+  function start() {
+    if (model || loading) return;
+    loading = true;
+    const sc = document.createElement('script');
+    sc.src = 'drahtmodell/drahtmodell.js';
+    sc.onload = () => {
+      model = window.Drahtmodell.mount(canvas, weak
+        ? { still: 99, yawDeg: 28 }
+        : { onStage: l => { cap.textContent = l; } });
+      if (weak) cap.textContent = 'Fertiges Modell';
+    };
+    sc.onerror = () => { loading = false; };
+    document.head.appendChild(sc);
+  }
+  /* Das Skript (etwa 20 KB) wird erst geladen, wenn man dem Band nahe kommt */
+  if ('IntersectionObserver' in window) {
+    const io2 = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io2.disconnect(); start(); } }, { rootMargin: '700px 0px' });
+    io2.observe(band);
+  } else start();
+  /* Papier <-> Blaupause: Farben neu lesen */
+  new MutationObserver(() => { if (model) model.recolor(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-look'] });
+})();
+
 /* ---------- Rundgang-Viewer ---------- */
 const stage = $('#stage'), poster = $('#poster'), frameEl = $('#frame'), posterTitle = $('#posterTitle'), posterImg = $('#posterImg');
 let current = $('.vt.active').dataset.id;
@@ -760,12 +791,6 @@ $$('#cfgWants .pill').forEach(b => b.addEventListener('click', () => {
   b.classList.contains('active') ? state.wants.add(b.dataset.v) : state.wants.delete(b.dataset.v); state.touched = true; renderCfg();
 }));
 sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.touched = true; renderCfg(); });
-$('#cfgGo').addEventListener('click', e => {
-  e.preventDefault();
-  state.touched = true; renderCfg();
-  $('#form').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-  setTimeout(() => $('#form [name="name"]').focus({ preventScroll: true }), 650);
-});
 renderCfg();
 
 /* ---------- Formular ---------- */

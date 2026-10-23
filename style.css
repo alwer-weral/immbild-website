@@ -145,14 +145,20 @@ nav a.btn { color: var(--on-accent); }
 .tile:hover { border-color: rgba(var(--gold-rgb), .5); }
 .tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 0%), rgba(var(--gold-rgb), .10), transparent 45%); opacity: 0; transition: opacity .3s; pointer-events: none; }
 .tile:hover::before { opacity: 1; }
-.tile.big { grid-column: span 2; grid-row: span 2; min-height: 360px; } .tile.wide { grid-column: span 2; }
+.tile.big { grid-column: span 2; } .tile.wide { grid-column: 1 / -1; }   /* ohne Zeichnung braucht die große Kachel keine zwei Reihen mehr */
+.tile.band { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: clamp(1.2rem, 3vw, 3rem); align-items: center; padding: clamp(1.4rem, 3vw, 2.4rem); }
+.band-text p + p { margin-top: 1rem; }
+.band-note { display: flex; flex-direction: column; gap: .3rem; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .76rem; letter-spacing: .04em; }
+#wmCap { color: var(--gold); text-transform: uppercase; min-height: 1.2em; } .band-hint { color: var(--muted); }
+.band-art { min-width: 0; --wm-ink: var(--ink); --wm-gold: var(--gold); --wm-cyan: var(--cyan); }
+.band-art canvas { display: block; width: 100%; aspect-ratio: 16 / 10; cursor: grab; } .band-art canvas:active { cursor: grabbing; } .band-art canvas:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 760px) { .tile.band { grid-template-columns: minmax(0, 1fr); } .band-art canvas { aspect-ratio: 4 / 3; } }
 .tile p { color: var(--muted); margin: 0; }
 .tile h3, .device h3 { hyphens: auto; overflow-wrap: break-word; }
 @media (max-width: 1200px) {
   .bento { grid-template-columns: repeat(2, 1fr); } .tile.big { grid-column: span 2; grid-row: auto; } .tile.wide { grid-column: span 2; }
 }
 .num { font-family: ui-monospace, Menlo, monospace; color: var(--gold); font-size: .85rem; display: block; margin-bottom: 1.4rem; }
-.tile .art { position: absolute; right: -10px; bottom: -10px; width: 62%; color: var(--gold); opacity: .55; }
 
 /* Who */
 .who { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 2rem; align-items: start; }
@@ -217,7 +223,14 @@ input[type=range] { width: 100%; accent-color: var(--gold); height: 28px; }
 .summary { font-size: 1.25rem; line-height: 1.5; margin: 0; }
 .summary mark { background: none; color: var(--gold); font-weight: 700; }
 .sum small { color: var(--muted); }
-.anfrage-main { display: grid; gap: 1.2rem; min-width: 0; }
+.anfrage-main { display: grid; min-width: 0; }
+/* Menü und Formular sind ein Kasten */
+.anfrage-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.anfrage-box .cfg-col { padding: clamp(1.4rem, 3vw, 2.4rem); border: 0; border-radius: 0; background: none; }
+.anfrage-box .form { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.cfg-note { margin: 1.6rem 0 0; color: var(--muted); font-size: .9rem; }
+html[data-look] .anfrage-box { background: var(--panel); border-color: rgba(var(--fg-rgb), .35); box-shadow: 0 1px 0 var(--panel-hi) inset, 0 14px 30px -22px rgba(var(--fg-rgb), .45); }
+html[data-look] .anfrage-box .cfg-col, html[data-look] .anfrage-box .form { background: none; box-shadow: none; border-color: rgba(var(--fg-rgb), .35); }
 .cfg-other { margin-top: 1rem; } .cfg-other label { display: block; font-size: .85rem; color: var(--muted); font-weight: 600; margin-bottom: .35rem; }
 .cfg-other input { width: 100%; min-width: 0; font: inherit; font-size: 1rem; color: var(--ink); padding: .85rem 1rem; border-radius: 12px; border: 1px solid var(--line); background: var(--field); } .cfg-other input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb), .15); }
 .cfg-go { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; margin-top: 1.8rem; } .cfg-go small { color: var(--muted); flex: 1 1 14em; }
