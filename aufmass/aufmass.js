@@ -173,7 +173,9 @@
       var pitch = Math.max(8 * RAD, Math.min(72 * RAD, st.pitch + st.uPitch));
       cy_ = Math.cos(yaw); sy_ = Math.sin(yaw); cp_ = Math.cos(pitch); sp_ = Math.sin(pitch);
     }
+    var projFn = opts.project || null;
     function proj(p) {
+      if (projFn) return projFn(p);                           // eingebettet im Hero: gleiche Projektion wie die Punktwolke und das 3D-Modell
       var fc = st.focus || [S.cx, S.cy, S.cz];
       var x = p[0] - fc[0], y = p[1] - fc[1], z = p[2] - fc[2];
       var xr = x * cy_ - y * sy_, yr = x * sy_ + y * cy_;
@@ -334,6 +336,7 @@
       toggleSpin: function () { st.spin = !st.spin; return st.spin; },
       recolor: function () { colors = readColors(); draw(); },
       setTime: function (t) { st.t = t; st.started = false; draw(); },
+      setProject: function (fn) { projFn = fn; },
       setCamera: function (yawRad, pitchRad, zoom) { st.yaw = yawRad; st.pitch = pitchRad; st.uYaw = 0; st.uPitch = 0; st.spin = false; if (zoom) st.zoom = zoom; },
       setZoom: function (z, focus) { st.zoom = z; if (focus !== undefined) st.focus = focus; draw(); },
       setView: function (yawDeg, pitchDeg) { st.uYaw = yawDeg * RAD - st.yaw; st.uPitch = pitchDeg * RAD - st.pitch; draw(); },
