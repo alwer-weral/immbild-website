@@ -92,6 +92,7 @@ nav a.btn { color: var(--on-accent); }
 .hud-row { display: flex; gap: .5rem; align-items: baseline; } .hud-row b { font-size: 1.8rem; color: var(--ink); } .hud-row.small b { font-size: .9rem; }
 .hud-bar { height: 3px; background: var(--line); margin: .5rem 0 .7rem; border-radius: 3px; overflow: hidden; } .hud-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--cyan)); }
 .scroll-hint { position: absolute; left: 50%; bottom: 1.2rem; width: 26px; height: 42px; border: 2px solid var(--line); border-radius: 14px; transform: translateX(-50%); }
+.cloud-ctrl .scroll-hint { position: relative; left: auto; bottom: auto; transform: none; flex: none; margin: 0 .35rem 0 -.1rem; }      /* sitzt jetzt in der Leiste, zwischen Papier/Blaupause und den vier Ansichten */
 .scroll-hint span { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--gold); animation: wheel 1.8s infinite; }
 @keyframes wheel { to { transform: translateY(14px); opacity: 0; } }
 
@@ -439,14 +440,14 @@ html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look
 @media (max-width: 760px) { .view-note { display: none; } }
 
 /* Real Estate: dichte Farbpunkte über der Zeichnung, mit Überblendung */
-#cloud { transition: opacity .7s; }
-#realcanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity .7s; pointer-events: none; }
+#cloud { transition: opacity 1.8s ease; }
+#realcanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity 1.8s ease; pointer-events: none; }
 .hero.real #realcanvas { opacity: 1; }
 .hero.real #cloud { opacity: 0; }
-#auf { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity .7s; pointer-events: none; --wm-ink: var(--ink); --wm-gold: var(--gold); --wm-muted: var(--muted); }
+#auf { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity 1.6s ease; pointer-events: none; --wm-ink: var(--ink); --wm-gold: var(--gold); --wm-muted: var(--muted); }
 .hero.auf #auf { opacity: 1; }
-.hero.auf #realcanvas { opacity: .32; }                                  /* das 3D-Modell scheint durch, solange die Zeichnung entsteht */
-.hero.auf.aufdone #realcanvas { opacity: 0; transition: opacity 1.8s; }
+.hero.auf #realcanvas { opacity: .46; }                                  /* das 3D-Modell scheint durch, solange die Zeichnung entsteht */
+.hero.auf.aufdone #realcanvas { opacity: .3; transition: opacity 2.4s ease; }      /* und bleibt danach mit etwa 30 % stehen: das Aufmaß ordnet das bunte Modell neu */
 .hero.auf #cloud { opacity: 0; }
 /* Bedienleiste: eine Zeile rechtsbündig, direkt links neben Plus/Minus */
 .cloud-ctrl { justify-content: flex-end; }

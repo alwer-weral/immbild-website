@@ -566,6 +566,7 @@ nav.addEventListener('click', e => {
     if (v === 'real') {
       if (!glCount && note) note.textContent = '3D-Modell wird geladen …';
       if (!(await loadRealGL())) { if (note) note.textContent = 'Das 3D-Modell ist hier gerade nicht verfügbar.'; return false; }
+      fadeUntil = performance.now() + 2400;
       showAuf = false; hero2.classList.remove('auf', 'aufdone');
       showReal = true; hero2.classList.add('real'); lastView = '';
       return true;
@@ -576,6 +577,7 @@ nav.addEventListener('click', e => {
       if (!aufPlayed) { aufT = 0; aufPlayed = true; } else aufT = auf.total + 1;      // beim ersten Mal wird sie gezeichnet, danach steht sie fertig da
       hero2.classList.remove('real'); showReal = false;
       hero2.classList.toggle('aufdone', !(glCount && aufT < auf.total * 0.9));      // war das 3D-Modell eben zu sehen, scheint es beim Zeichnen durch
+      fadeUntil = performance.now() + 2400;
       showAuf = true; hero2.classList.add('auf'); lastView = '';
       return true;
     }
@@ -589,6 +591,7 @@ nav.addEventListener('click', e => {
 
   /* Automatische Führung: Scanner-Punkte, dann Maße, dann 3D-Modell, zuletzt Aufmaß. Jede Bedienung beendet sie. */
   let guide = 0, guideAt = 0, guideBusy = false;
+  let pitchBase = null, fadeUntil = 0;                // fadeUntil: so lange läuft die alte Ansicht bei der langsamen Überblendung mit
   function guideStep(t) {
     if (guideBusy) return;
     if (guide === 0) {
@@ -634,7 +637,9 @@ nav.addEventListener('click', e => {
     hudZ();
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
-    const pitch = Math.max(0.3, Math.min(1.5, ((showReal || showAuf) ? 0.92 : (real ? 1.08 : 0.5)) + dragPitch + my * 0.08 - scrollP * 0.25));
+    const pitchTarget = (showReal || showAuf) ? 0.92 : (real ? 1.08 : 0.5);
+    pitchBase = pitchBase === null ? pitchTarget : pitchBase + (pitchTarget - pitchBase) * (1 - Math.exp(-dt / 380));      // die Neigung gleitet beim Wechsel, statt zu springen
+    const pitch = Math.max(0.3, Math.min(1.5, pitchBase + dragPitch + my * 0.08 - scrollP * 0.25));
     const look = document.documentElement.dataset.look === 'blaupause' ? 'blaupause' : 'papier';
     const paper = look === 'papier';
     if (real && !draw) loadDrawing();
@@ -650,7 +655,8 @@ nav.addEventListener('click', e => {
     });
     const edge = -half + sweep * 2 * half;
 
-    if (showAuf && auf) {                                             // Aufmaß: eigene Fläche, aber exakt dieselbe Kamera wie das 3D-Modell (Lage, Drehung, Maßstab, Zoom)
+    const crossfade = (showReal || showAuf) && performance.now() < fadeUntil;      // bei der Überblendung läuft die alte Ansicht mit gleicher Kamera weiter
+    if (showAuf && auf) {                                             // Aufmaß: eigene Fläche, exakt dieselbe Kamera wie das 3D-Modell (Lage, Drehung, Maßstab, Zoom)
       aufT = Math.min(aufT + dt / 1000 * 1.8, auf.total + 1);
       const { cx: pcx, cyy: pcy, scale: psc, cy: pcos, sy: psin, cp: pcp, sp: psp, rs: prs } = V;
       auf.setProject(p => {
@@ -659,13 +665,15 @@ nav.addEventListener('click', e => {
         return [(pcx + x1 * psc * f) / prs, (pcy - up * psc * f) / prs, depth];
       });
       auf.setTime(aufT);
-      if (glCount && !hero.classList.contains('aufdone')) {          // das 3D-Modell läuft unter der Zeichnung mit und verschwindet, wenn sie fertig ist
+      if (glCount) {                                                  // das 3D-Modell läuft unter der Zeichnung mit und bleibt mit etwa 20 % stehen
         drawReal();
         if (aufT >= auf.total * 0.9) hero.classList.add('aufdone');
       }
-      syncView(); return;
+      if (!crossfade) { syncView(); return; }
+    } else if (showReal && glCount) {                                 // 3D-Modell: die dichte Ansicht
+      drawReal();
+      if (!crossfade) { syncView(); return; }
     }
-    if (showReal && glCount) { drawReal(); syncView(); return; }    // 3D-Modell: nur die dichte Ansicht zeichnen
 
     // Überblick: etwa 45 % der Punkte; beim Heranzoomen kommen die übrigen dazu
     const blend = dichte === 'voll' ? 1 : dichte === 'grob' ? 0 : Math.max(0, Math.min(1, (zoom - 1) / 0.8));
