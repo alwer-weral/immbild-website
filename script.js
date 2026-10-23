@@ -91,10 +91,13 @@ nav.addEventListener('click', e => {
     return { n, X, Y, Z, C, R, real: true };
   }
 
-  let W, H, rs, img, buf32, yaw = -0.55, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
+  let W, H, rs, shiftX = 0, img, buf32, yaw = -0.55, mx = 0, my = 0, sweep = reduceMotion ? 1 : 0, visible = true, last = 0, lastDraw = 0, scrollP = 0, running = false, hudTick = 0;
 
   function resize() {
     W = canvas.clientWidth; H = canvas.clientHeight;
+    /* Auf breiten Bildschirmen rückt der Text mit dem gemeinsamen Seitenrand nach innen; das Haus rückt ein Stück mit */
+    const hi = hero.querySelector('.hero-inner');
+    shiftX = hi ? Math.max(0, parseFloat(getComputedStyle(hi).paddingLeft) - 0.06 * W) * 0.6 : 0;
     rs = Math.max(0.6, Math.min(devicePixelRatio || 1, 1.5, 1300 / W));
     canvas.width = Math.round(W * rs); canvas.height = Math.round(H * rs);
     img = ctx.createImageData(canvas.width, canvas.height);
@@ -116,7 +119,7 @@ nav.addEventListener('click', e => {
     hudZoom.textContent = String(v).padStart(3, '0');
     hudZoomBar.style.width = Math.max(0, Math.min(1, (zoom - 1) / (ZMAX - 1))) * 100 + '%';
   };
-  const used = () => { if (tip) tip.classList.add('used'); };
+  const used = () => { morphAuto = false; if (tip) tip.classList.add('used'); };      // jede Bedienung beendet die automatische Führung
   if (tip && matchMedia('(hover: none)').matches) tip.textContent = 'Nach unten wischen: ins Haus zoomen · seitlich: drehen';
   const trackLen = () => Math.max(1, hero.offsetHeight - innerHeight);
   const scrollProgress = () => Math.max(0, Math.min(1, scrollY / trackLen()));
@@ -449,6 +452,7 @@ nav.addEventListener('click', e => {
   /* Real Estate: dichte, undurchsichtige Farbpunkte aus dem Scan, mit der Grafikkarte gezeichnet (WebGL) */
   const glCanvas = $('#realcanvas');
   let gl = null, glProg = null, glPos = null, glCol = null, glCount = 0, glLoading = false, showReal = false;
+  let showAuf = false, auf = null, aufLoading = null, aufT = 0, aufPlayed = false;      // Aufmaßzeichnung (aufmass/aufmass.js, wird erst bei Bedarf geladen)
   const GL_SPACING = 0.07;     // Abstand der Punkte in Metern (aus dem Export)
   const VS = `
     attribute vec3 aPos; attribute vec3 aCol;
@@ -535,33 +539,82 @@ nav.addEventListener('click', e => {
   const realBtn = $('.view-switch [data-view="real"]');
   if (!initGL() && realBtn) realBtn.hidden = true;     // ohne WebGL gibt es die Ansicht nicht
 
-  /* Schalter Scanner-Punkte | Maße | 3D-Modell */
+  /* Aufmaßzeichnung: Skript und Daten erst laden, wenn man sie braucht */
+  const loadScript = src => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = no; document.head.appendChild(el); });
+  function loadAuf() {
+    if (auf) return Promise.resolve(true);
+    if (aufLoading) return aufLoading;
+    aufLoading = (async () => {
+      try {
+        if (!window.Aufmass) await loadScript('aufmass/aufmass.js');
+        const data = await (await fetch('aufmass/aufmass.json')).json();
+        auf = window.Aufmass.mount($('#auf'), data, {
+          external: true,
+          layout: (w, h) => { const wide = w > 900; return { ox: wide ? w * 0.71 + shiftX : w * 0.5, oy: wide ? h * 0.54 : 235, k: wide ? Math.min(w * 0.0185, h * 0.034) : w * 0.028 }; }
+        });
+        return true;
+      } catch (err) { aufLoading = null; return false; }
+    })();
+    return aufLoading;
+  }
+  new MutationObserver(() => { if (auf) auf.recolor(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-look'] });
+
+  /* Schalter Scanner-Punkte | Maße | Aufmaß | 3D-Modell; auto = von der automatischen Führung ausgelöst */
   const viewBtns = $$('.view-switch button');
   const hero2 = hero;
-  viewBtns.forEach(b => b.addEventListener('click', async () => {
-    const v = b.dataset.view;
-    morphAuto = false; used();
+  async function selectView(v, auto) {
+    if (!auto) { morphAuto = false; used(); }
+    const note = document.getElementById('viewNote');
     if (v === 'real') {
-      const note = document.getElementById('viewNote');
       if (!glCount && note) note.textContent = '3D-Modell wird geladen …';
-      if (!(await loadRealGL())) { if (note) note.textContent = 'Das 3D-Modell ist hier gerade nicht verfügbar.'; return; }
+      if (!(await loadRealGL())) { if (note) note.textContent = 'Das 3D-Modell ist hier gerade nicht verfügbar.'; return false; }
+      showAuf = false; hero2.classList.remove('auf');
       showReal = true; hero2.classList.add('real'); lastView = '';
-      return;
+      return true;
     }
-    showReal = false; hero2.classList.remove('real');
+    if (v === 'aufmass') {
+      if (!auf && note) note.textContent = 'Aufmaß wird geladen …';
+      if (!(await loadAuf())) { if (note) note.textContent = 'Die Aufmaßzeichnung ist hier gerade nicht verfügbar.'; return false; }
+      if (!aufPlayed) { aufT = 0; aufPlayed = true; } else aufT = auf.total + 1;      // beim ersten Mal wird sie gezeichnet, danach steht sie fertig da
+      showReal = false; hero2.classList.remove('real');
+      showAuf = true; hero2.classList.add('auf'); lastView = '';
+      return true;
+    }
+    showReal = false; showAuf = false; hero2.classList.remove('real', 'auf');
     mpTarget = v === 'zeichnung' ? 1 : 0;
     if (mpTarget === 1) loadDrawing();
     lastView = '';
-  }));
+    return true;
+  }
+  viewBtns.forEach(b => b.addEventListener('click', () => selectView(b.dataset.view, false)));
+
+  /* Automatische Führung: Scanner-Punkte, dann Maße, dann Aufmaß, zuletzt 3D-Modell. Jede Bedienung beendet sie. */
+  let guide = 0, guideAt = 0, guideBusy = false;
+  function guideStep(t) {
+    if (guideBusy) return;
+    if (guide === 0) {
+      if (!draw || mpTarget !== 0) return;
+      if (!guideAt) guideAt = t;
+      if (t - guideAt > 1200) { mpTarget = 1; guide = 1; guideAt = 0; loadAuf(); }
+    } else if (guide === 1) {
+      if (mp < 0.999) return;
+      if (!guideAt) guideAt = t;
+      if (t - guideAt > 2800) { guideBusy = true; selectView('aufmass', true).then(ok => { guideBusy = false; guideAt = 0; guide = ok ? 2 : 3; }); }
+    } else if (guide === 2) {
+      if (!auf || aufT < auf.total + 0.5) return;
+      if (!guideAt) guideAt = t;
+      if (t - guideAt > 2600) { guideBusy = true; selectView('real', true).then(() => { guideBusy = false; guide = 3; }); }
+    }
+  }
   let lastView = '';
   function syncView() {
-    const v = showReal ? 'real' : (mpTarget === 1 ? 'zeichnung' : 'scan');
+    const v = showAuf ? 'aufmass' : showReal ? 'real' : (mpTarget === 1 ? 'zeichnung' : 'scan');
     if (v === lastView) return; lastView = v;
     viewBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
     const note = document.getElementById('viewNote');
     if (note) {
       note.classList.remove('swap'); void note.offsetWidth; note.classList.add('swap');
-      note.textContent = v === 'scan' ? 'Jeder Punkt ist eine Laser-Messung. Millionen davon ergeben das Modell.' : v === 'zeichnung' ? 'Aus den Messpunkten entsteht der Plan: Wände, Dach und Maße.' : 'So sieht es von oben aus: echte Farben aus dem Scan, nichts durchsichtig.';
+      note.textContent = v === 'scan' ? 'Jeder Punkt ist eine Laser-Messung. Millionen davon ergeben das Modell.' : v === 'zeichnung' ? 'Aus den Messpunkten entsteht der Plan: Wände, Dach und Maße.' : v === 'aufmass' ? 'Daraus wird die Außenansicht gezeichnet, wie ein Aufmaß: Dach, Wände, Fenster und Türen.' : 'So sieht es von oben aus: echte Farben aus dem Scan, nichts durchsichtig.';
     }
   }
 
@@ -587,19 +640,24 @@ nav.addEventListener('click', e => {
     const look = document.documentElement.dataset.look === 'blaupause' ? 'blaupause' : 'papier';
     const paper = look === 'papier';
     if (real && !draw) loadDrawing();
-    if (sweep >= 1 && morphAuto && mpTarget === 0 && draw && !reduceMotion) { if (!morphWait) morphWait = t; if (t - morphWait > 1200) mpTarget = 1; }
+    if (sweep >= 1 && morphAuto && !reduceMotion) guideStep(t);
     mp += Math.max(-1, Math.min(1, (mpTarget - mp) * 4)) * dt / 3800;
     mp = Math.max(0, Math.min(1, mp));
     const wide = W > 900;
     Object.assign(V, {
-      cx: (wide ? W * 0.71 : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
+      cx: (wide ? W * 0.71 + shiftX : W * 0.5) * rs, cyy: (wide ? H * 0.54 : 235) * rs,
       scale: Math.min(W, H * 1.3) * (wide ? perM : perMsmall) * rs * (real ? 1 : 2.2) * zoom,
       cy: Math.cos(yw), sy: Math.sin(yw), cp: Math.cos(pitch), sp: Math.sin(pitch),
       cw: canvas.width, ch: canvas.height, rs, wide, real, paper, blue: !paper, mp
     });
     const edge = -half + sweep * 2 * half;
 
-    if (showReal && glCount) { drawReal(); syncView(); return; }    // Real Estate: nur die dichte Ansicht zeichnen
+    if (showAuf && auf) {                                             // Aufmaß: nur die Zeichnung (eigene Fläche), Kamera und Zoom wie im Hero
+      aufT = Math.min(aufT + dt / 1000 * 1.8, auf.total + 1);
+      auf.setCamera(yw + 1.21, Math.max(.14, Math.min(1.2, .6 + dragPitch + my * 0.08 - scrollP * 0.2)), zoom);
+      auf.setTime(aufT); syncView(); return;
+    }
+    if (showReal && glCount) { drawReal(); syncView(); return; }    // 3D-Modell: nur die dichte Ansicht zeichnen
 
     // Überblick: etwa 45 % der Punkte; beim Heranzoomen kommen die übrigen dazu
     const blend = dichte === 'voll' ? 1 : dichte === 'grob' ? 0 : Math.max(0, Math.min(1, (zoom - 1) / 0.8));
