@@ -445,6 +445,8 @@ html[data-look] .cloud-ctrl .look button[aria-pressed="true"], .cloud-ctrl .look
 .hero.real #cloud { opacity: 0; }
 #auf { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: 0; transition: opacity .7s; pointer-events: none; --wm-ink: var(--ink); --wm-gold: var(--gold); --wm-muted: var(--muted); }
 .hero.auf #auf { opacity: 1; }
+.hero.auf #realcanvas { opacity: .32; }                                  /* das 3D-Modell scheint durch, solange die Zeichnung entsteht */
+.hero.auf.aufdone #realcanvas { opacity: 0; transition: opacity 1.8s; }
 .hero.auf #cloud { opacity: 0; }
 /* Bedienleiste: eine Zeile rechtsbündig, direkt links neben Plus/Minus */
 .cloud-ctrl { justify-content: flex-end; }

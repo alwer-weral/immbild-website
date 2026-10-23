@@ -452,6 +452,7 @@ nav.addEventListener('click', e => {
   /* Real Estate: dichte, undurchsichtige Farbpunkte aus dem Scan, mit der Grafikkarte gezeichnet (WebGL) */
   const glCanvas = $('#realcanvas');
   let gl = null, glProg = null, glPos = null, glCol = null, glCount = 0, glLoading = false, showReal = false;
+  const ZS = 0.348294;                   // Höhenversatz: die Aufmaßdaten liegen auf Höhe 0 der Punktwolke, das Modell ab dem tiefsten Punkt
   let showAuf = false, auf = null, aufLoading = null, aufT = 0, aufPlayed = false;      // Aufmaßzeichnung (aufmass/aufmass.js, wird erst bei Bedarf geladen)
   const GL_SPACING = 0.07;     // Abstand der Punkte in Metern (aus dem Export)
   const VS = `
@@ -548,10 +549,7 @@ nav.addEventListener('click', e => {
       try {
         if (!window.Aufmass) await loadScript('aufmass/aufmass.js');
         const data = await (await fetch('aufmass/aufmass.json')).json();
-        auf = window.Aufmass.mount($('#auf'), data, {
-          external: true,
-          layout: (w, h) => { const wide = w > 900; return { ox: wide ? w * 0.71 + shiftX : w * 0.5, oy: wide ? h * 0.54 : 235, k: wide ? Math.min(w * 0.0185, h * 0.034) : w * 0.028 }; }
-        });
+        auf = window.Aufmass.mount($('#auf'), data, { external: true });
         return true;
       } catch (err) { aufLoading = null; return false; }
     })();
@@ -568,7 +566,7 @@ nav.addEventListener('click', e => {
     if (v === 'real') {
       if (!glCount && note) note.textContent = '3D-Modell wird geladen …';
       if (!(await loadRealGL())) { if (note) note.textContent = 'Das 3D-Modell ist hier gerade nicht verfügbar.'; return false; }
-      showAuf = false; hero2.classList.remove('auf');
+      showAuf = false; hero2.classList.remove('auf', 'aufdone');
       showReal = true; hero2.classList.add('real'); lastView = '';
       return true;
     }
@@ -576,11 +574,12 @@ nav.addEventListener('click', e => {
       if (!auf && note) note.textContent = 'Aufmaß wird geladen …';
       if (!(await loadAuf())) { if (note) note.textContent = 'Die Aufmaßzeichnung ist hier gerade nicht verfügbar.'; return false; }
       if (!aufPlayed) { aufT = 0; aufPlayed = true; } else aufT = auf.total + 1;      // beim ersten Mal wird sie gezeichnet, danach steht sie fertig da
-      showReal = false; hero2.classList.remove('real');
+      hero2.classList.remove('real'); showReal = false;
+      hero2.classList.toggle('aufdone', !(glCount && aufT < auf.total * 0.9));      // war das 3D-Modell eben zu sehen, scheint es beim Zeichnen durch
       showAuf = true; hero2.classList.add('auf'); lastView = '';
       return true;
     }
-    showReal = false; showAuf = false; hero2.classList.remove('real', 'auf');
+    showReal = false; showAuf = false; hero2.classList.remove('real', 'auf', 'aufdone');
     mpTarget = v === 'zeichnung' ? 1 : 0;
     if (mpTarget === 1) loadDrawing();
     lastView = '';
@@ -588,22 +587,21 @@ nav.addEventListener('click', e => {
   }
   viewBtns.forEach(b => b.addEventListener('click', () => selectView(b.dataset.view, false)));
 
-  /* Automatische Führung: Scanner-Punkte, dann Maße, dann Aufmaß, zuletzt 3D-Modell. Jede Bedienung beendet sie. */
+  /* Automatische Führung: Scanner-Punkte, dann Maße, dann 3D-Modell, zuletzt Aufmaß. Jede Bedienung beendet sie. */
   let guide = 0, guideAt = 0, guideBusy = false;
   function guideStep(t) {
     if (guideBusy) return;
     if (guide === 0) {
       if (!draw || mpTarget !== 0) return;
       if (!guideAt) guideAt = t;
-      if (t - guideAt > 1200) { mpTarget = 1; guide = 1; guideAt = 0; loadAuf(); }
+      if (t - guideAt > 1200) { mpTarget = 1; guide = 1; guideAt = 0; loadRealGL(); loadAuf(); }
     } else if (guide === 1) {
       if (mp < 0.999) return;
       if (!guideAt) guideAt = t;
-      if (t - guideAt > 2800) { guideBusy = true; selectView('aufmass', true).then(ok => { guideBusy = false; guideAt = 0; guide = ok ? 2 : 3; }); }
+      if (t - guideAt > 2800) { guideBusy = true; selectView('real', true).then(ok => { guideBusy = false; guideAt = 0; guide = ok ? 2 : 3; }); }
     } else if (guide === 2) {
-      if (!auf || aufT < auf.total + 0.5) return;
       if (!guideAt) guideAt = t;
-      if (t - guideAt > 2600) { guideBusy = true; selectView('real', true).then(() => { guideBusy = false; guide = 3; }); }
+      if (t - guideAt > 4200) { guideBusy = true; selectView('aufmass', true).then(() => { guideBusy = false; guide = 3; }); }
     }
   }
   let lastView = '';
@@ -636,7 +634,7 @@ nav.addEventListener('click', e => {
     hudZ();
     hero.classList.toggle('zoomed', zoomT > 1.25);
     const yw = yaw + dragYaw + mx * 0.35 + scrollP * 1.1;
-    const pitch = Math.max(0.3, Math.min(1.5, (showReal ? 0.92 : (real ? 1.08 : 0.5)) + dragPitch + my * 0.08 - scrollP * 0.25));
+    const pitch = Math.max(0.3, Math.min(1.5, ((showReal || showAuf) ? 0.92 : (real ? 1.08 : 0.5)) + dragPitch + my * 0.08 - scrollP * 0.25));
     const look = document.documentElement.dataset.look === 'blaupause' ? 'blaupause' : 'papier';
     const paper = look === 'papier';
     if (real && !draw) loadDrawing();
@@ -652,10 +650,20 @@ nav.addEventListener('click', e => {
     });
     const edge = -half + sweep * 2 * half;
 
-    if (showAuf && auf) {                                             // Aufmaß: nur die Zeichnung (eigene Fläche), Kamera und Zoom wie im Hero
+    if (showAuf && auf) {                                             // Aufmaß: eigene Fläche, aber exakt dieselbe Kamera wie das 3D-Modell (Lage, Drehung, Maßstab, Zoom)
       aufT = Math.min(aufT + dt / 1000 * 1.8, auf.total + 1);
-      auf.setCamera(yw + 1.21, Math.max(.14, Math.min(1.2, .6 + dragPitch + my * 0.08 - scrollP * 0.2)), zoom);
-      auf.setTime(aufT); syncView(); return;
+      const { cx: pcx, cyy: pcy, scale: psc, cy: pcos, sy: psin, cp: pcp, sp: psp, rs: prs } = V;
+      auf.setProject(p => {
+        const x1 = p[0] * pcos - p[1] * psin, y1 = p[0] * psin + p[1] * pcos, zz = p[2] + ZS - zMid;
+        const up = zz * pcp + y1 * psp, depth = y1 * pcp - zz * psp, f = camZ / (camZ + depth);
+        return [(pcx + x1 * psc * f) / prs, (pcy - up * psc * f) / prs, depth];
+      });
+      auf.setTime(aufT);
+      if (glCount && !hero.classList.contains('aufdone')) {          // das 3D-Modell läuft unter der Zeichnung mit und verschwindet, wenn sie fertig ist
+        drawReal();
+        if (aufT >= auf.total * 0.9) hero.classList.add('aufdone');
+      }
+      syncView(); return;
     }
     if (showReal && glCount) { drawReal(); syncView(); return; }    // 3D-Modell: nur die dichte Ansicht zeichnen
 
