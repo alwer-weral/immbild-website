@@ -827,8 +827,8 @@ function updateTimeline() {
 addEventListener('scroll', updateTimeline, { passive: true }); updateTimeline();
 
 /* ---------- Anfrage: Menü (Projekt zusammenstellen) und Formular in einem Weg ---------- */
-const state = { type: 'Wohnung', other: '', size: 120, wants: new Set(['3D-Rundgang']), touched: false };
-const sizeIn = $('#cfgSize'), sizeOut = $('#cfgSizeOut');
+const state = { type: 'Wohnung', other: '', size: 120, exact: false, wants: new Set(['3D-Rundgang']), touched: false };
+const sizeIn = $('#cfgSize'), numIn = $('#cfgSizeNum');
 const otherBox = $('#cfgOther'), otherIn = $('#cfgOtherText');
 const fObjekt = $('#fObjekt'), fFlaeche = $('#fFlaeche'), fWunsch = $('#fWunsch'), fSumm = $('#fSumm'), formSum = $('#formSum'), fPreis = $('#fPreis'), priceOut = $('#cfgPrice');
 const FORM_HINT = 'Oben können Sie Ihr Projekt zusammenstellen. Oder Sie schreiben uns einfach.';
@@ -838,20 +838,25 @@ function plain() {
   const list = w.length ? w.slice(0, -1).join(', ') + (w.length > 1 ? ' und ' : '') + w.slice(-1) : 'noch keine Leistung gewählt';
   return { w, list };
 }
-/* Preisstufen (netto): bis zur jeweiligen Fläche gilt der Preis; über 1.000 m² 1.250 € plus 1,20 € je weiterer m² */
-const STUFEN = [[50, 180], [100, 280], [150, 380], [200, 425], [300, 550], [500, 750], [750, 950], [1000, 1250]];
+/* Preisorientierung (netto): bis 50 m² pauschal 180 €, danach gleichmäßig von Eckpreis zu Eckpreis, über 1.000 m² 1.250 € plus 1,20 € je weiterer m²; auf 5 € gerundet */
+const ECK = [[50, 180], [100, 280], [150, 380], [200, 425], [300, 550], [500, 750], [750, 950], [1000, 1250]];
 function preis(s) {
-  const st = STUFEN.find(x => s <= x[0]);
-  return st ? st[1] : Math.round(1250 + (s - 1000) * 1.2);
+  if (s <= ECK[0][0]) return ECK[0][1];
+  let p = 1250 + (s - 1000) * 1.2;
+  for (let i = 1; i < ECK.length; i++) {
+    if (s <= ECK[i][0]) { const [x0, y0] = ECK[i - 1], [x1, y1] = ECK[i]; p = y0 + (y1 - y0) * (s - x0) / (x1 - x0); break; }
+  }
+  return Math.round(p / 5) * 5;
 }
 const eur = n => n.toLocaleString('de-DE') + ' €';
 function renderCfg() {
-  const sizeTxt = state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²';
-  sizeOut.textContent = sizeTxt;
+  const open = state.size >= 1500 && !state.exact;      // Regler ganz rechts: „und mehr“; eine getippte Zahl gilt genau
+  const sizeTxt = open ? '1.500 m² und mehr' : state.size + ' m²';
+  if (document.activeElement !== numIn) numIn.value = state.size;
   const type = state.type === 'Sonstiges' && state.other ? `Sonstiges: ${state.other}` : state.type;
   const { w, list } = plain();
   /* Bei „Sonstiges" (Event, Fahrzeug …) gibt es keine Fläche, also auch keinen Richtpreis */
-  const preisTxt = state.type === 'Sonstiges' ? '' : `${state.size >= 1500 ? 'ab ' : ''}${eur(preis(state.size))} netto zzgl. USt.`;
+  const preisTxt = state.type === 'Sonstiges' ? '' : `${open ? 'ab ' : ''}${eur(preis(state.size))} netto zzgl. USt.`;
   priceOut.innerHTML = preisTxt ? `Preisorientierung: <b>${preisTxt}</b>` : 'Preis nach Absprache, wir melden uns persönlich.';
   /* Die Auswahl geht nur mit, wenn sie angefasst wurde: als eigene Felder und als Satz in der Anfrage-Mail */
   if (state.touched) {
@@ -874,7 +879,16 @@ $$('#cfgWants .pill').forEach(b => b.addEventListener('click', () => {
   b.classList.toggle('active');
   b.classList.contains('active') ? state.wants.add(b.dataset.v) : state.wants.delete(b.dataset.v); state.touched = true; renderCfg();
 }));
-sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.touched = true; renderCfg(); });
+sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.exact = false; state.touched = true; renderCfg(); });
+/* Die Fläche lässt sich auch tippen; der Regler folgt (bis zu seinen Enden), der Preis rechnet mit der genauen Zahl */
+numIn.addEventListener('input', () => {
+  const v = Math.min(Math.round(+numIn.value), 10000);
+  if (!(v > 0)) return;
+  state.size = v; state.exact = true; state.touched = true;
+  sizeIn.value = Math.min(Math.max(v, 20), 1500);
+  renderCfg();
+});
+numIn.addEventListener('change', () => { numIn.value = state.size; });
 renderCfg();
 /* Der Hinweis unter dem Regler öffnet die passende Frage und springt dorthin */
 $('#cfgFaqLink').addEventListener('click', e => {

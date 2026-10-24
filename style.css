@@ -221,6 +221,9 @@ nav a.btn { color: var(--on-accent); }
 .pills { display: flex; flex-wrap: wrap; gap: .6rem; }
 .pill { padding: .6rem 1.2rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; cursor: pointer; transition: all .2s; }
 .pill:hover { border-color: var(--gold); } .pill.active { background: var(--gold); color: var(--on-accent); border-color: var(--gold); font-weight: 700; }
+.cfg-size { display: flex; align-items: center; gap: 1rem; } .cfg-size input[type=range] { flex: 1; min-width: 0; }
+.size-num { display: flex; align-items: center; gap: .45rem; color: var(--muted); font-size: .95rem; }
+.size-num input { width: 5.8rem; min-width: 0; font: inherit; font-size: 1rem; text-align: right; color: var(--ink); padding: .6rem .8rem; border-radius: 12px; border: 1px solid var(--line); background: var(--field); } .size-num input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb), .15); }
 input[type=range] { width: 100%; accent-color: var(--gold); height: 28px; }
 .sum { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; background: linear-gradient(160deg, rgba(var(--gold-rgb), .09), transparent 60%), var(--card); }
 .summary { font-size: 1.25rem; line-height: 1.5; margin: 0; }
