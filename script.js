@@ -830,7 +830,7 @@ addEventListener('scroll', updateTimeline, { passive: true }); updateTimeline();
 const state = { type: 'Wohnung', other: '', size: 120, wants: new Set(['3D-Rundgang']), touched: false };
 const sizeIn = $('#cfgSize'), sizeOut = $('#cfgSizeOut');
 const otherBox = $('#cfgOther'), otherIn = $('#cfgOtherText');
-const fObjekt = $('#fObjekt'), fFlaeche = $('#fFlaeche'), fWunsch = $('#fWunsch'), fSumm = $('#fSumm'), formSum = $('#formSum');
+const fObjekt = $('#fObjekt'), fFlaeche = $('#fFlaeche'), fWunsch = $('#fWunsch'), fSumm = $('#fSumm'), formSum = $('#formSum'), fPreis = $('#fPreis'), priceOut = $('#cfgPrice');
 const FORM_HINT = 'Oben können Sie Ihr Projekt zusammenstellen. Oder Sie schreiben uns einfach.';
 const esc = t => t.replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function plain() {
@@ -838,18 +838,28 @@ function plain() {
   const list = w.length ? w.slice(0, -1).join(', ') + (w.length > 1 ? ' und ' : '') + w.slice(-1) : 'noch keine Leistung gewählt';
   return { w, list };
 }
+/* Preisstufen (netto): bis zur jeweiligen Fläche gilt der Preis; über 1.000 m² 1.250 € plus 1,20 € je weiterer m² */
+const STUFEN = [[50, 180], [100, 280], [150, 380], [200, 425], [300, 550], [500, 750], [750, 950], [1000, 1250]];
+function preis(s) {
+  const st = STUFEN.find(x => s <= x[0]);
+  return st ? st[1] : Math.round(1250 + (s - 1000) * 1.2);
+}
+const eur = n => n.toLocaleString('de-DE') + ' €';
 function renderCfg() {
   const sizeTxt = state.size >= 1500 ? '1.500 m² und mehr' : state.size + ' m²';
   sizeOut.textContent = sizeTxt;
   const type = state.type === 'Sonstiges' && state.other ? `Sonstiges: ${state.other}` : state.type;
   const { w, list } = plain();
+  /* Bei „Sonstiges" (Event, Fahrzeug …) gibt es keine Fläche, also auch keinen Richtpreis */
+  const preisTxt = state.type === 'Sonstiges' ? '' : `${state.size >= 1500 ? 'ab ' : ''}${eur(preis(state.size))} netto zzgl. USt.`;
+  priceOut.innerHTML = preisTxt ? `Preisorientierung: <b>${preisTxt}</b>` : 'Preis nach Absprache, wir melden uns persönlich.';
   /* Die Auswahl geht nur mit, wenn sie angefasst wurde: als eigene Felder und als Satz in der Anfrage-Mail */
   if (state.touched) {
-    fObjekt.value = type; fFlaeche.value = sizeTxt; fWunsch.value = w.join(', ');
-    fSumm.value = `Ich plane ein Projekt für ${type} mit etwa ${sizeTxt} und wünsche ${list}.`;
-    formSum.innerHTML = `<b>Ihre Auswahl:</b> ${esc(type)}, ${sizeTxt}, ${list}`;
+    fObjekt.value = type; fFlaeche.value = sizeTxt; fWunsch.value = w.join(', '); fPreis.value = preisTxt;
+    fSumm.value = `Ich plane ein Projekt für ${type} mit etwa ${sizeTxt} und wünsche ${list}.` + (preisTxt ? ` Angezeigte Preisorientierung: ${preisTxt}` : '');
+    formSum.innerHTML = `<b>Ihre Auswahl:</b> ${esc(type)}, ${sizeTxt}, ${list}` + (preisTxt ? `. Preisorientierung: ${preisTxt}` : '');
   } else {
-    fObjekt.value = fFlaeche.value = fWunsch.value = fSumm.value = '';
+    fObjekt.value = fFlaeche.value = fWunsch.value = fSumm.value = fPreis.value = '';
     formSum.textContent = FORM_HINT;
   }
 }
@@ -866,6 +876,11 @@ $$('#cfgWants .pill').forEach(b => b.addEventListener('click', () => {
 }));
 sizeIn.addEventListener('input', () => { state.size = +sizeIn.value; state.touched = true; renderCfg(); });
 renderCfg();
+/* Der Hinweis unter dem Regler öffnet die passende Frage und springt dorthin */
+$('#cfgFaqLink').addEventListener('click', e => {
+  e.preventDefault();
+  const q = $('#faq-preis'); q.open = true; q.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
 
 /* ---------- Formular ---------- */
 const form = $('#form'), msg = $('#msg');

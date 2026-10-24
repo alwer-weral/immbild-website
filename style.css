@@ -231,6 +231,8 @@ input[type=range] { width: 100%; accent-color: var(--gold); height: 28px; }
 .anfrage-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
 .anfrage-box .cfg-col { padding: clamp(1.4rem, 3vw, 2.4rem); border: 0; border-radius: 0; background: none; }
 .anfrage-box .form { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.cfg-price { margin: 1rem 0 0; padding: .8rem 1rem; border-left: 3px solid var(--gold); border-radius: 0 12px 12px 0; background: rgba(var(--gold-rgb), .08); color: var(--text-2); font-size: .95rem; } .cfg-price b { color: var(--gold); font-size: 1.1rem; }
+.cfg-note a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; } .cfg-note b { color: var(--text-2); }
 .cfg-note { margin: 1.6rem 0 0; color: var(--muted); font-size: .9rem; }
 html[data-look] .anfrage-box { background: var(--panel); border-color: rgba(var(--fg-rgb), .35); box-shadow: 0 1px 0 var(--panel-hi) inset, 0 14px 30px -22px rgba(var(--fg-rgb), .45); }
 html[data-look] .anfrage-box .cfg-col, html[data-look] .anfrage-box .form { background: none; box-shadow: none; border-color: rgba(var(--fg-rgb), .35); }
