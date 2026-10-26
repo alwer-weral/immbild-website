@@ -118,8 +118,15 @@ foreach ($zeilen as &$z) {
     unset($z['_t']);
 }
 unset($z);
+$info = array();
+if (isset($_GET['diag'])) {
+    foreach ((array)glob($verz . '*') as $f) {
+        $info[] = array('name' => basename($f), 'groesse' => @filesize($f), 'lesbar' => @is_readable($f), 'geaendert' => @date('c', @filemtime($f)), 'zeilen' => (is_file($f) && substr($f, -3) !== '.gz') ? count((array)@file($f)) : null);
+    }
+}
 echo json_encode(array(
     'ok' => true,
+    'info' => $info,
     'gelesen' => $gelesen,
     'unlesbar' => $unlesbar,
     'dateien' => array_map('basename', $dateien),
