@@ -95,6 +95,7 @@ nav.addEventListener('click', e => {
 
   function resize() {
     W = canvas.clientWidth; H = canvas.clientHeight;
+    if (!W || !H) return;   // Fläche noch nicht sichtbar oder ohne Größe: später erneut versuchen, sonst bricht das ganze Skript ab
     /* Auf breiten Bildschirmen rückt der Text mit dem gemeinsamen Seitenrand nach innen; das Haus rückt ein Stück mit */
     const hi = hero.querySelector('.hero-inner');
     shiftX = hi ? Math.max(0, parseFloat(getComputedStyle(hi).paddingLeft) - 0.06 * W) * 0.6 : 0;
@@ -683,6 +684,7 @@ nav.addEventListener('click', e => {
     const zc = 12 - open * (12 - 2.55);
     if (real && !inner && (zoomT > 1.05 || (wide && sweep >= 1 && !saveData))) loadInner();
 
+    if (!buf32) { resize(); if (!buf32) return; }
     buf32.fill(0);
     const shown = plot(c, { edge, thr: real ? 115 + blend * 141 : 256, zc, alpha: 1, gain: paper ? 0.3 : (real ? 1.7 : 1), inner: false });
     if (inner && open > 0.03) plot(inner, { edge: 99, thr: 256, zc: 99, alpha: Math.min(1, open * 1.4), gain: paper ? 0.42 : 1.3, inner: true });
@@ -802,13 +804,21 @@ const who = [
   { t: 'Eigentümer', p: 'Wer verkaufen oder vermieten möchte, zeigt sein Objekt von der besten Seite und muss nicht jeden Interessenten persönlich durchführen.', l: ['Weniger Besichtigungen im eigenen Zuhause', 'Ein Link, den jeder weiterleiten kann', 'Dauerhaft abrufbar'] },
   { t: 'Vermieter und Unterkünfte', p: 'Monteurhäuser, Ferienwohnungen und Gästezimmer verkaufen sich über Vertrauen. Gäste sehen vorab, wie es wirklich aussieht.', l: ['Weniger Rückfragen vor der Buchung', 'Ehrlicher Eindruck von Zimmern und Ausstattung', 'Einbindbar auf der eigenen Website'] },
   { t: 'Gewerbe und Hotels', p: 'Büros, Praxen, Läden und Häuser mit Gastronomie lassen sich als digitaler Zwilling präsentieren, planen und dokumentieren.', l: ['Flächen online vermieten', 'Bestand und Raumaufteilung dokumentieren', 'Erster Eindruck für Kunden und Gäste'] },
-  { t: 'Architekten', p: 'Der Scan hält den Bestand fest, bevor geplant, umgebaut oder saniert wird. Maße lassen sich später am Rechner prüfen.', l: ['Bestandsaufnahme als digitaler Zwilling', 'Abstimmung mit Bauherren ohne Vor-Ort-Termin', 'Ergänzend Architekturfotografie'] }
+  { t: 'Architekten', p: 'Der Scan hält den Bestand fest, bevor geplant, umgebaut oder saniert wird. Maße lassen sich später am Rechner prüfen.', l: ['Bestandsaufnahme als digitaler Zwilling', 'Abstimmung mit Bauherren ohne Vor-Ort-Termin', 'Ergänzend Architekturfotografie'] },
+  { t: 'Realer Mehrwert', p: 'Ein digitaler Zwilling zahlt sich aus, für den Verkäufer und für den Makler. Zwei von Matterport veröffentlichte Auswertungen aus den USA zeigen, wie deutlich der Unterschied sein kann.',
+    l: ['Schneller verkauft: Objekte mit 3D-Rundgang wurden in der Auswertung der Texas Tech University (143.575 Inserate, vier US-Regionen) bis zu 31 % schneller verkauft. Eine zweite Auswertung mit 700 Inseraten fand 20 % kürzere Vermarktungszeiten.',
+        'Mehr Ertrag: Je nach Markt lagen die Verkaufspreise bei 4 bis 9 % höher, in der zweiten Auswertung bei 4,8 %.',
+        'Zeit sparen: Interessenten sehen das Objekt vorab am Bildschirm, Makler führen weniger Besichtigungen durch, und der Scan liefert zugleich Maße und Grundriss. Aktuelle Pläne sind eine gute Grundlage für Gespräche mit Bank oder Gutachter.'],
+    s: [{ n: 'Matterport, Studien 2020 (US-Märkte)', u: 'https://matterport.com/blog/3d-tours-properties-sell-31-faster-and-higher-price' }] }
 ];
 const whoBody = $('#whoBody');
 function showWho(i) {
   const w = who[i];
   $('#whoTitle').textContent = w.t; $('#whoText').textContent = w.p;
   $('#whoList').innerHTML = w.l.map(x => `<li>${x}</li>`).join('');
+  const src = $('#whoSrc');
+  src.hidden = !w.s;
+  src.innerHTML = w.s ? 'Quellen: ' + w.s.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer">${x.n}</a>`).join(' · ') : '';
   whoBody.classList.remove('swap'); void whoBody.offsetWidth; whoBody.classList.add('swap');
 }
 $$('.wt').forEach(b => b.addEventListener('click', () => {
