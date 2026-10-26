@@ -912,13 +912,16 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   msg.textContent = 'Wird gesendet …';
   try {
-    const res = await fetch('/', { method: 'POST', body: new FormData(form) });
-    if (!res.ok) throw new Error(res.status);
+    const res = await fetch('anfrage.php', { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+    let data = null;
+    try { data = await res.json(); } catch (_) { /* keine JSON-Antwort */ }
+    if (!res.ok || !data || !data.ok) throw new Error(data && data.fehler ? data.fehler : String(res.status));
     form.reset();
     renderCfg();
     msg.textContent = 'Danke! Ihre Anfrage ist angekommen. Wir melden uns persönlich.';
   } catch (err) {
-    msg.textContent = 'Das Senden hat nicht geklappt. Bitte schreiben Sie uns direkt an bastian.a.werner@immbild.de.';
+    const grund = /^\d+$/.test(err.message) ? '' : err.message + ' ';
+    msg.textContent = 'Das Senden hat nicht geklappt. ' + grund + 'Bitte schreiben Sie uns direkt an bastian.a.werner@immbild.de.';
   }
 });
 
