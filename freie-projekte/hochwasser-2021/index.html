@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hochwasser 2021 in Bad Münstereifel – 3D-Dokumentation – immbild.</title>
+  <meta name="description" content="Zwei begehbare 3D-Rundgänge durch Bad Münstereifel, aufgenommen im September 2021 nach der Flutkatastrophe. Ein freies Projekt von immbild., nicht kommerziell.">
+  <meta name="theme-color" content="#f3f0e6">
+  <meta property="og:title" content="Bad Münstereifel nach der Flut – begehbar in 3D">
+  <meta property="og:description" content="Zwei begehbare 3D-Rundgänge durch Bad Münstereifel, aufgenommen im September 2021 nach der Flutkatastrophe. Ein freies Projekt von immbild., nicht kommerziell.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23f1d252' stroke-width='3'/%3E%3Cpath d='M16 10v6h5' fill='none' stroke='%23f1d252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script>
+/* Darstellung: tagsüber Papier, nachts Blaupause (nach der Sonne über Erftstadt), außer man hat selbst gewählt (gilt für diesen Besuch) */
+(function(){var R=document.documentElement,S=null,mem=null;try{S=window.sessionStorage;S.getItem('look');}catch(e){S=null;}
+function get(){var v=null;try{v=S?S.getItem('look'):mem;}catch(e){v=mem;}return(v==='papier'||v==='blaupause')?v:null;}
+function set(v){mem=v;try{if(S)S.setItem('look',v);}catch(e){}}
+function sun(d){d=d||new Date();var r=Math.PI/180,lat=50.83*r,lng=6.8,
+n=Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-Date.UTC(d.getUTCFullYear(),0,0))/864e5),g=2*Math.PI/365*(n-1),
+eq=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g)),
+dc=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g),
+ha=Math.acos(Math.cos(90.833*r)/(Math.cos(lat)*Math.cos(dc))-Math.tan(lat)*Math.tan(dc))/r,
+noon=720-4*lng-eq,m=d.getUTCHours()*60+d.getUTCMinutes()+d.getUTCSeconds()/60;
+return(m>=noon-4*ha&&m<noon+4*ha)?'papier':'blaupause';}
+var q=new URLSearchParams(location.search).get('look');if(q==='nacht')q='blaupause';
+if(q==='auto'){mem=null;try{if(S)S.removeItem('look');}catch(e){}}else if(q==='papier'||q==='blaupause')set(q);
+window.immLook={sun:sun,manual:get,set:set};
+R.dataset.look=get()||sun();})();
+</script>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/freie-projekte/freie-projekte.css">
+</head>
+<body>
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="site-header scrolled fp-header">
+  <a class="logo" href="/" aria-label="immbild.de Startseite">imm<b>bild</b><i>.de</i></a>
+  <div class="look" role="group" aria-label="Darstellung" title="Tagsüber Papier, nachts Blaupause – automatisch, bis Sie selbst wählen">
+    <button type="button" data-look="papier" aria-pressed="true">Papier</button>
+    <button type="button" data-look="blaupause" aria-pressed="false">Blaupause</button>
+  </div>
+  <a class="fp-back" href="/freie-projekte/" aria-label="Zu den freien Projekten">← <span>Freie Projekte</span></a>
+</header>
+<main id="main" class="fp-main">
+  <div class="fp-intro">
+    <p class="fp-badge">Freies Projekt · nicht kommerziell</p>
+    <h1>Bad Münstereifel,<br><span class="grad">zwei Monate nach der Flut.</span></h1>
+    <p class="fp-lead">Im Juli 2021 traf das Hochwasser die Altstadt von Bad Münstereifel mit voller Wucht. Im September haben wir die Straßen begangen und mit dem Laserscanner aufgenommen. Das Ergebnis sind zwei begehbare 3D-Rundgänge. Sie halten fest, wie die Stadt in dieser Zeit aussah.</p>
+  </div>
+
+  <section class="fp-section" id="rundgaenge" aria-labelledby="h-rund">
+    <h2 id="h-rund">Die Rundgänge</h2>
+    <p>Beide Rundgänge beginnen an einem Stadttor, jeweils aus der entgegengesetzten Richtung. Sie können sich frei bewegen, umdrehen und bis an die Hausfassaden herangehen.</p>
+    <div class="viewer" id="viewer">
+      <div class="viewer-tabs" role="tablist" aria-label="Rundgänge">
+        <button role="tab" aria-selected="true" class="vt active" data-id="HfY1JUjUpjP" data-title="Besuch 1 · 14. September 2021" data-img="/freie-projekte/hochwasser-2021/vorschau-besuch-1.jpg" data-alt="Vorschau des ersten Rundgangs: Hausfassade in Bad Münstereifel, vor den Schaufenstern Aufräumarbeiten">
+          <b>Besuch 1</b><small>14. September 2021</small>
+        </button>
+        <button role="tab" aria-selected="false" class="vt" data-id="RL1oFH6v2Jm" data-title="Besuch 2 · 20. September 2021" data-img="/freie-projekte/hochwasser-2021/vorschau-besuch-2.jpg" data-alt="Vorschau des zweiten Rundgangs: Altstadtgasse mit Absperrband, aufgenommenem Pflaster und Schutt">
+          <b>Besuch 2</b><small>20. September 2021</small>
+        </button>
+      </div>
+      <div class="viewer-stage" id="stage">
+        <div class="poster" id="poster">
+          <img id="posterImg" src="/freie-projekte/hochwasser-2021/vorschau-besuch-1.jpg" width="1280" height="720" decoding="async" alt="Vorschau des ersten Rundgangs: Hausfassade in Bad Münstereifel, vor den Schaufenstern Aufräumarbeiten">
+          <div class="poster-ui">
+            <span class="chip live"><i></i> 3D</span>
+            <button class="play" id="play" aria-label="Rundgang starten"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+            <p class="poster-title" id="posterTitle">Besuch 1 · 14. September 2021</p>
+            <p class="poster-note">Mit dem Start wird der Rundgang von Matterport geladen. Dabei werden Daten an Matterport übertragen.</p>
+          </div>
+        </div>
+        <iframe id="frame" title="3D-Rundgang Bad Münstereifel" allow="fullscreen; xr-spatial-tracking; accelerometer; gyroscope" allowfullscreen loading="lazy" hidden></iframe>
+        <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      </div>
+      <p class="hint"><b>Tipp:</b> Im Rundgang können Sie zwischen Begehung, Dollhouse-Ansicht und Grundriss wechseln. Mit den Pfeiltasten bewegen Sie sich vor und zurück (hoch, runter) und drehen sich (links, rechts). Klicken Sie dafür einmal in den Rundgang.</p>
+      <p class="hint"><b>Bitte etwas Geduld:</b> Die Rundgänge sind sehr groß und umfassen lange Strecken. Beim Start kann es deshalb einen Moment dauern, bis das Bild erscheint. Das liegt an der Datenmenge, die Matterport ausliefert.</p>
+    </div>
+  </section>
+
+  <section class="fp-section" aria-labelledby="h-warum">
+    <h2 id="h-warum">Warum es diese Aufnahmen gibt</h2>
+    <p>Von der Flut gibt es viele Fotos und Filme. Ein begehbares Abbild hält etwas anderes fest: den Raum selbst. Man sieht, wie eng die Gassen sind, wie weit die Schäden an den Häusern reichen und wie die Aufräumarbeiten ausgesehen haben, als sie noch in vollem Gang waren. Das lässt sich später nicht mehr nachholen.</p>
+    <p>Wir haben das Projekt auf eigene Initiative und auf eigene Kosten gemacht. Es gab keinen Auftraggeber und es gibt kein Angebot dazu. Die Seite soll dokumentieren und nichts verkaufen.</p>
+    <ul class="fp-facts">
+      <li><b>Zwei Besuche</b><small>14. und 20. September 2021</small></li>
+      <li><b>Zwei Rundgänge</b><small>je ab einem Stadttor, aus entgegengesetzter Richtung</small></li>
+      <li><b>Leica BLK360</b><small>Laserscanner für die Aufnahme vor Ort</small></li>
+      <li><b>Matterport</b><small>Bereitstellung der begehbaren 3D-Rundgänge</small></li>
+    </ul>
+  </section>
+
+  <section class="fp-section" aria-labelledby="h-nutzung">
+    <h2 id="h-nutzung">Für wen das gedacht ist</h2>
+    <p>Die Rundgänge stehen jedem offen. Wer sie für Archiv, Forschung, Planung, Gedenken oder Berichterstattung nutzen möchte, spricht uns gern an. Wir freuen uns, wenn die Aufnahmen weiterhin gebraucht werden.</p>
+    <div class="fp-contact">
+      <p><b>Alexander Werner</b>, immbild.de</p>
+      <p><a href="mailto:bastian.a.werner@immbild.de">bastian.a.werner@immbild.de</a><br><a href="tel:+4922354789201">+49 2235 4789201</a></p>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <a class="logo" href="/">imm<b>bild</b><i>.de</i></a>
+  <p>Alexander Werner · Lechenicher Straße 4 · 50374 Erftstadt</p>
+  <p><a href="/freie-projekte/">Freie Projekte</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a></p>
+</footer>
+<script src="/freie-projekte/freie-projekte.js"></script>
+</body>
+</html>
