@@ -79,21 +79,27 @@ if (empty($_POST['datenschutz'])) {
 // Anhaenge einsammeln
 $anhaenge = array();
 $summe = 0;
-if (isset($_FILES['anhang']) && is_array($_FILES['anhang']['name'])) {
-    foreach ($_FILES['anhang']['name'] as $i => $dateiname) {
-        $fehler = $_FILES['anhang']['error'][$i];
+if (isset($_FILES['anhang'])) {
+    $dateien = $_FILES['anhang'];
+    if (!is_array($dateien['name'])) { // ein einzelnes Feld "anhang" statt "anhang[]"
+        foreach (array('name', 'tmp_name', 'error', 'size') as $k) {
+            $dateien[$k] = array($dateien[$k]);
+        }
+    }
+    foreach ($dateien['name'] as $i => $dateiname) {
+        $fehler = $dateien['error'][$i];
         if ($fehler === UPLOAD_ERR_NO_FILE) {
             continue;
         }
         if ($fehler !== UPLOAD_ERR_OK) {
             fertig(413, false, 'Ein Anhang konnte nicht uebertragen werden (zu gross?). Bitte kleinere Dateien senden.', $wantsJson);
         }
-        $summe += (int)$_FILES['anhang']['size'][$i];
+        $summe += (int)$dateien['size'][$i];
         if ($summe > MAX_ANHANG_GESAMT) {
             fertig(413, false, 'Die Anhaenge sind zusammen zu gross (hoechstens 15 MB).', $wantsJson);
         }
         $sauber = preg_replace('/[^\p{L}\p{N}._ -]+/u', '_', basename((string)$dateiname));
-        $anhaenge[] = array('name' => $sauber !== '' ? $sauber : 'anhang', 'pfad' => $_FILES['anhang']['tmp_name'][$i]);
+        $anhaenge[] = array('name' => $sauber !== '' ? $sauber : 'anhang', 'pfad' => $dateien['tmp_name'][$i]);
     }
 }
 $anhangNamen = implode(', ', array_map(function ($a) {

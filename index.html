@@ -393,7 +393,7 @@ R.dataset.look=get()||sun();})();
         <label>Objektort (optional)<input name="ort" autocomplete="address-level2"></label>
       </div>
       <label>Möchten Sie noch etwas ergänzen?<textarea name="nachricht" id="msgField" rows="6" placeholder="Zum Beispiel: Termin, Besonderheiten, Fragen. Oder einfach: Was möchten Sie zeigen?"></textarea></label>
-      <label class="file">Anhänge (optional)<input type="file" name="anhang" multiple></label>
+      <label class="file">Anhänge (optional)<input type="file" name="anhang[]" multiple></label>
       <label class="check"><input type="checkbox" name="datenschutz" required> <span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzhinweise</a> gelesen und bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden.</span></label>
       <button class="btn magnetic" type="submit">Anfrage senden</button>
       <p class="msg" id="msg" role="status"></p>
