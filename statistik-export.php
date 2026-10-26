@@ -40,7 +40,28 @@ function kuerzen($s, $max)
 $since = isset($_GET['since']) ? (int)$_GET['since'] : (time() - 14 * 86400);
 $schluessel = hash_hmac('sha256', 'immbild-statistik-v1', $token);
 
-$verz = __DIR__ . '/../logs/';
+// Moegliche Orte der Protokolle: die Domain immbild.de ist eine Zusatzdomain, ihre Logs liegen unter system/immbild.de/logs
+$kandidaten = array(
+    '/var/www/vhosts/system/immbild.de/logs/',
+    dirname(__DIR__, 2) . '/system/immbild.de/logs/',
+    __DIR__ . '/../logs/',
+);
+if (isset($_GET['diag'])) {
+    $kinfo = array();
+    foreach ($kandidaten as $k) {
+        $kinfo[] = array('pfad' => $k, 'ist_verz' => @is_dir($k), 'beispiele' => @is_dir($k) ? array_slice((array)@scandir($k), 0, 12) : null);
+    }
+    $kinfo[] = array('open_basedir' => ini_get('open_basedir'), 'dir' => __DIR__, 'php' => PHP_VERSION);
+    echo json_encode(array('ok' => true, 'kandidaten' => $kinfo));
+    exit;
+}
+$verz = $kandidaten[2];
+foreach ($kandidaten as $k) {
+    if (@is_dir($k) && glob($k . 'proxy_access*')) {
+        $verz = $k;
+        break;
+    }
+}
 $dateien = is_dir($verz) ? glob($verz . 'proxy_access*') : array();
 $dateien = array_values(array_filter((array)$dateien, function ($f) {
     return is_file($f) && is_readable($f) && substr($f, -8) !== '.statbuf';
@@ -118,15 +139,9 @@ foreach ($zeilen as &$z) {
     unset($z['_t']);
 }
 unset($z);
-$info = array();
-if (isset($_GET['diag'])) {
-    foreach ((array)glob($verz . '*') as $f) {
-        $info[] = array('name' => basename($f), 'groesse' => @filesize($f), 'lesbar' => @is_readable($f), 'geaendert' => @date('c', @filemtime($f)), 'zeilen' => (is_file($f) && substr($f, -3) !== '.gz') ? count((array)@file($f)) : null);
-    }
-}
 echo json_encode(array(
     'ok' => true,
-    'info' => $info,
+    'verzeichnis' => $verz,
     'gelesen' => $gelesen,
     'unlesbar' => $unlesbar,
     'dateien' => array_map('basename', $dateien),
