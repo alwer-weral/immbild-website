@@ -264,40 +264,54 @@ R.dataset.look=get()||sun();})();
     <p class="sub">Je nach Objekt setzen wir die Kamera oder den Laserscanner ein. Gezeigt wird beides in einem Rundgang.</p>
   </div>
   <div class="tech">
-    <article class="device reveal">
+    <article class="device d-pro reveal">
       <svg viewBox="0 0 220 260" aria-hidden="true">
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M110 150 60 250M110 150 160 250M110 150V250"/>
           <rect x="82" y="40" width="56" height="110" rx="14" class="body"/>
-          <circle cx="110" cy="75" r="14"/><circle cx="110" cy="75" r="5" class="fill"/>
-          <circle cx="110" cy="115" r="14"/><circle cx="110" cy="115" r="5" class="fill"/>
+          <circle cx="110" cy="75" r="14"/><circle cx="110" cy="75" r="5" class="fill shot"/>
+          <circle cx="110" cy="115" r="14"/><circle cx="110" cy="115" r="5" class="fill shot"/>
           <path d="M96 30h28" />
         </g>
+        <g class="ind" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="190" cy="30" r="14"/>
+          <path d="M190 16v-4.5M203.3 25.7l4.3-1.4M198.2 41.3l2.7 3.7M181.8 41.3l-2.7 3.7M176.7 25.7l-4.3-1.4" opacity=".6"/>
+          <path class="turn5" d="M190 30V19"/>
+        </g>
+        <text x="214" y="64" text-anchor="end" fill="currentColor" stroke="none" opacity=".6" font-size="11" font-family="ui-monospace,Menlo,monospace">5 Schritte</text>
         <g class="rings" fill="none" stroke="currentColor"><circle cx="110" cy="95" r="70"/><circle cx="110" cy="95" r="95"/></g>
       </svg>
       <h3>Matterport Pro2</h3>
       <p>Das System für begehbare digitale Zwillinge. Schnell erfasst, intuitiv zu bedienen, mit Dollhouse-Ansicht.</p>
       <ul><li>Ideal für Wohnungen, Häuser und Unterkünfte</li><li>Rundgang direkt im Browser, ohne App</li><li>Grundriss und Maße optional dazubuchbar</li></ul>
     </article>
-    <article class="device reveal">
+    <article class="device d-blk reveal">
       <svg viewBox="0 0 220 260" aria-hidden="true">
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M110 160 60 250M110 160 160 250M110 160V250"/>
           <path d="M80 160V88a30 30 0 0 1 60 0v72Z" class="body"/>
           <path d="M80 110h60M80 130h60" opacity=".5"/>
           <path d="M94 70a16 16 0 0 1 32 0" />
+          <path class="blk-sweep" d="M110 72V156" opacity=".5"/>
         </g>
+        <g class="ind" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="190" cy="30" r="14"/>
+          <path class="turn1" d="M190 30V19"/>
+        </g>
+        <text x="214" y="64" text-anchor="end" fill="currentColor" stroke="none" opacity=".6" font-size="11" font-family="ui-monospace,Menlo,monospace">stufenlos</text>
         <g class="rings" fill="none" stroke="currentColor"><ellipse cx="110" cy="100" rx="70" ry="24"/><ellipse cx="110" cy="100" rx="95" ry="34"/></g>
       </svg>
       <h3>Leica BLK360</h3>
       <p>Der Laserscanner für höchste Detailtreue. Er misst Räume und Gebäude mit Präzision im Millimeterbereich, auch von oben.</p>
       <ul><li>Für größere und komplexe Objekte</li><li>Aufnahmen vom Hochstativ aus der Vogelperspektive</li><li>Ergebnis verbindet sich mit dem Matterport-Rundgang</li></ul>
     </article>
-    <article class="device reveal">
+    <article class="device d-cam reveal">
       <svg viewBox="0 0 220 260" aria-hidden="true">
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="30" y="80" width="160" height="100" rx="14" class="body"/>
-          <circle cx="110" cy="130" r="34"/><circle cx="110" cy="130" r="20"/><circle cx="110" cy="130" r="6" class="fill"/>
+          <circle cx="110" cy="130" r="34"/>
+          <g class="iris"><path d="M110 110l17.3 10v20L110 150l-17.3-10v-20Z" class="body"/><path d="M110 110v40M127.3 120l-34.6 20M127.3 140l-34.6-20" opacity=".45"/></g>
+          <circle cx="110" cy="130" r="6" class="fill"/>
           <path d="M60 80l10-18h40l10 18"/><circle cx="165" cy="100" r="5"/>
         </g>
         <g class="rings" fill="none" stroke="currentColor"><circle cx="110" cy="130" r="78"/><circle cx="110" cy="130" r="100"/></g>
