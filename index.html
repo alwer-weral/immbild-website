@@ -269,8 +269,8 @@ R.dataset.look=get()||sun();})();
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M110 150 60 250M110 150 160 250M110 150V250"/>
           <rect x="82" y="40" width="56" height="110" rx="14" class="body"/>
-          <circle cx="110" cy="75" r="14"/><circle cx="110" cy="75" r="5" class="fill shot"/>
-          <circle cx="110" cy="115" r="14"/><circle cx="110" cy="115" r="5" class="fill shot"/>
+          <g class="lens"><circle cx="110" cy="75" r="14"/><circle cx="110" cy="75" r="5" class="fill shot"/>
+          <circle cx="110" cy="115" r="14"/><circle cx="110" cy="115" r="5" class="fill shot"/></g>
           <path d="M96 30h28" />
         </g>
         <g class="ind" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
@@ -287,12 +287,13 @@ R.dataset.look=get()||sun();})();
     </article>
     <article class="device d-blk reveal">
       <svg viewBox="0 0 220 260" aria-hidden="true">
+        <defs><clipPath id="blkClip"><path d="M80 160V88a30 30 0 0 1 60 0v72Z"/></clipPath></defs>
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M110 160 60 250M110 160 160 250M110 160V250"/>
           <path d="M80 160V88a30 30 0 0 1 60 0v72Z" class="body"/>
           <path d="M80 110h60M80 130h60" opacity=".5"/>
           <path d="M94 70a16 16 0 0 1 32 0" />
-          <path class="blk-sweep" d="M110 72V156" opacity=".5"/>
+          <g clip-path="url(#blkClip)"><g class="blk-roll"><path d="M50 60V160M70 60V160M90 60V160M110 60V160M130 60V160M150 60V160" opacity=".45"/></g></g>
         </g>
         <g class="ind" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
           <circle cx="190" cy="30" r="14"/>
