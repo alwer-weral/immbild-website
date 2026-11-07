@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>3D-Rundgang &amp; Immobilienfotografie Köln, Erftstadt | immbild.</title>
-  <meta name="description" content="3D-Rundgang mit Matterport und Leica BLK, dazu Immobilienfotografie. Aus Erftstadt für Köln, Bonn, Düsseldorf, Aachen und die Eifel. Ab 180 € netto.">
+  <title>3D-Rundgang für Orte, die bleiben · Köln, Bonn, Aachen, Eifel | immbild.</title>
+  <meta name="description" content="immbild. aus Erftstadt erstellt begehbare 3D-Rundgänge für Hotels, Ferienwohnungen, Restaurants, Schulen und Betriebe, für Verkauf und Vermietung, und für Orte, die nicht verloren gehen sollen. Geführt, mit Verweisen, dauerhaft online. Köln, Bonn, Düsseldorf, Aachen, Eifel.">
   <meta name="theme-color" content="#f3f0e6">
   <link rel="canonical" href="https://immbild.de/">
   <meta property="og:url" content="https://immbild.de/">
   <meta property="og:title" content="immbild. – Gehen Sie hinein, bevor Sie hingehen.">
-  <meta property="og:description" content="Virtuelle 3D-Rundgänge und Immobilienfotografie aus Erftstadt.">
+  <meta property="og:description" content="3D-Rundgänge für Orte, die bleiben: Hotels, Ferienwohnungen, Restaurants, Schulen, Betriebe, Verkauf und Vermietung. Geführt, mit Verweisen, dauerhaft online. Aus Erftstadt für Köln, Bonn, Düsseldorf, Aachen und die Eifel.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <meta property="og:site_name" content="immbild.">
@@ -19,7 +19,7 @@
   <meta property="og:image:alt" content="immbild.de: Gehen Sie hinein, bevor Sie hingehen. 3D-Rundgänge und Immobilienfotografie aus Erftstadt">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="immbild. – Gehen Sie hinein, bevor Sie hingehen.">
-  <meta name="twitter:description" content="Virtuelle 3D-Rundgänge und Immobilienfotografie aus Erftstadt.">
+  <meta name="twitter:description" content="3D-Rundgänge für Orte, die bleiben: Hotels, Ferienwohnungen, Restaurants, Schulen, Betriebe, Verkauf und Vermietung. Geführt, mit Verweisen, dauerhaft online. Aus Erftstadt für Köln, Bonn, Düsseldorf, Aachen und die Eifel.">
   <meta name="twitter:image" content="https://immbild.de/og-startseite.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23f1d252' stroke-width='3'/%3E%3Cpath d='M16 10v6h5' fill='none' stroke='%23f1d252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <script>
@@ -52,6 +52,7 @@ R.dataset.look=get()||sun();})();
     "telephone": "+49 2235 4789201",
     "email": "bastian.a.werner@immbild.de",
     "priceRange": "ab 180 € netto",
+    "founder": { "@type": "Person", "@id": "https://immbild.de/ueber-uns/#alexander-werner", "name": "Alexander Werner", "url": "https://immbild.de/ueber-uns/" },
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Lechenicher Straße 4",
@@ -71,6 +72,15 @@ R.dataset.look=get()||sun();})();
     ]
   }
   </script>
+  <style>
+    /* Drei Türen (Startseite) */
+    .tueren { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .tuer { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+    .tuer h3 { margin: .4rem 0 .6rem; }
+    .tuer p { flex: 1; }
+    .tuer b { color: var(--gold); margin-top: 1rem; }
+    @media (max-width: 900px) { .tueren { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
 <div class="cursor-glow" aria-hidden="true"></div>
@@ -85,11 +95,11 @@ R.dataset.look=get()||sun();})();
   <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menü öffnen"><span></span><span></span></button>
   <nav id="nav" aria-label="Hauptnavigation">
     <a href="#erleben">Erleben</a>
-    <a href="#leistungen">Leistungen</a>
-    <a href="#technik">Technik</a>
-    <a href="#ablauf">Ablauf</a>
-    <a href="freie-projekte/">Freie Projekte</a>
-    <a href="#anfrage">Projekt planen</a>
+    <a href="rundgang-fuer-gastgeber/">Für Gastgeber</a>
+    <a href="3d-rundgang-erstellen-lassen/">Erstellen lassen</a>
+    <a href="3d-rundgang-kosten/">Kosten</a>
+    <a href="firmenportraet/">Firmenporträt</a>
+    <a href="ueber-uns/">Über uns</a>
     <a href="#anfrage" class="btn btn-sm magnetic">Anfrage</a>
   </nav>
 </header>
@@ -104,9 +114,9 @@ R.dataset.look=get()||sun();})();
   <canvas id="auf" aria-hidden="true"></canvas>
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="hero-inner">
-    <p class="eyebrow"><span class="dot"></span> 3D-Rundgänge · Immobilienfotografie · Erftstadt</p>
+    <p class="eyebrow"><span class="dot"></span> 3D-Rundgänge für Orte, die bleiben · Erftstadt</p>
     <h1>Gehen Sie hinein,<br><span class="grad">bevor Sie hingehen.</span></h1>
-    <p class="hero-lead">Wir scannen Räume mit Matterport und Leica BLK und machen sie online begehbar. Für Käufer, Mieter und Gäste, rund um die Uhr, mit einem einzigen Link. Aus Erftstadt für Köln, Bonn, Düsseldorf, Aachen und die Eifel.</p>
+    <p class="hero-lead">Wir nehmen Häuser, Betriebe und Orte mit Matterport und Leica BLK auf und machen sie online begehbar: geführt, mit Verweisen zur Buchung, und so lange online, wie Sie wollen. Für Gäste, für Käufer und für Orte, die nicht verloren gehen sollen. Aus Erftstadt für Köln, Bonn, Düsseldorf, Aachen und die Eifel.</p>
     <div class="hero-cta">
       <a class="btn magnetic" href="#erleben">Rundgang erleben</a>
       <a class="btn ghost magnetic" href="#anfrage">Projekt planen</a>
@@ -232,27 +242,32 @@ R.dataset.look=get()||sun();})();
   </div>
 </section>
 
-<!-- FÜR WEN -->
+<!-- DREI TÜREN -->
 <section class="block alt" id="fuer-wen">
   <div class="head reveal">
     <p class="kicker">03 · Für wen</p>
-    <h2>Wer profitiert <span class="grad">vom Rundgang?</span></h2>
+    <h2>Drei Gründe, <span class="grad">hineinzugehen.</span></h2>
+    <p class="sub">Rundgänge für Orte, die bleiben. Suchen Sie sich Ihre Tür aus.</p>
   </div>
-  <div class="who reveal">
-    <div class="who-tabs" role="tablist" aria-label="Zielgruppen">
-      <button role="tab" aria-selected="true" class="wt active" data-i="0">Makler</button>
-      <button role="tab" aria-selected="false" class="wt" data-i="1">Eigentümer</button>
-      <button role="tab" aria-selected="false" class="wt" data-i="2">Vermieter und Unterkünfte</button>
-      <button role="tab" aria-selected="false" class="wt" data-i="3">Gewerbe und Hotels</button>
-      <button role="tab" aria-selected="false" class="wt" data-i="4">Architekten</button>
-      <button role="tab" aria-selected="false" class="wt wt-real" data-i="5">Realer Mehrwert</button>
-    </div>
-    <div class="who-body" id="whoBody" aria-live="polite">
-      <h3 id="whoTitle"></h3>
-      <p id="whoText"></p>
-      <ul id="whoList"></ul>
-      <p class="who-src" id="whoSrc" hidden></p>
-    </div>
+  <div class="tueren">
+    <a class="tuer tile reveal" href="rundgang-fuer-gastgeber/">
+      <span class="num">Gastgeber</span>
+      <h3>Ihr Haus, jederzeit begehbar.</h3>
+      <p>Hotel, Ferienwohnung, Restaurant, Veranstaltungsort, Praxis, Schule: Gäste gehen vor der Buchung online hinein, sehen jedes Zimmer und nicht nur das schönste. Der Rundgang bleibt auf Ihrer Website und in Ihrem Google-Profil, über Jahre.</p>
+      <b>Rundgang für Gastgeber →</b>
+    </a>
+    <a class="tuer tile reveal" href="3d-rundgang-erstellen-lassen/">
+      <span class="num">Verkauf und Vermietung</span>
+      <h3>Gehen Sie hinein, bevor Sie hingehen.</h3>
+      <p>Interessenten besichtigen online und kommen nur noch, wenn das Objekt wirklich passt. Das ganze Haus vom Dach bis zum Keller, als Link für Portal, Exposé und Website. Mit Fotos und Grundriss aus einem Termin.</p>
+      <b>3D-Rundgang erstellen lassen →</b>
+    </a>
+    <a class="tuer tile reveal" href="freie-projekte/">
+      <span class="num">Festhalten</span>
+      <h3>So, wie es war.</h3>
+      <p>Orte, die sich verändern oder verschwinden: die Altstadt nach der Flut, das Haus vor dem Umbau, die Ausstellung, die abgebaut wird. Ein begehbares Abbild hält den Raum selbst fest, nicht nur ein Bild davon.</p>
+      <b>Freie Projekte →</b>
+    </a>
   </div>
 </section>
 
@@ -261,7 +276,7 @@ R.dataset.look=get()||sun();})();
   <div class="head reveal">
     <p class="kicker">04 · Technik</p>
     <h2>Zwei Systeme. <span class="grad">Ein Ergebnis.</span></h2>
-    <p class="sub">Je nach Objekt setzen wir die Kamera oder den Laserscanner ein. Gezeigt wird beides in einem Rundgang.</p>
+    <p class="sub">Je nach Objekt setzen wir die Kamera oder den Laserscanner ein. Gezeigt wird beides in einem Rundgang. Was die Geräte können und wo ihre Grenzen liegen, steht auf der Seite <a href="ueber-uns/">Über uns</a>.</p>
   </div>
   <div class="tech">
     <article class="device d-pro reveal">
@@ -484,10 +499,10 @@ R.dataset.look=get()||sun();})();
     <details><summary>Wo kann ich den Rundgang einsetzen?</summary><p>Überall, wo ein Link funktioniert: im Exposé, auf Immobilienportalen, auf der eigenen Website, in Mails und Social Media.</p></details>
     <details id="faq-preis"><summary>Wie kommt der Preis zustande, und welche Fläche zählt?</summary><p>Der Preis richtet sich nach der Größe des Objekts und steigt gleichmäßig mit ihr, ohne Sprünge. Eine Orientierung sehen Sie unter „Anfrage und Preise“ am Regler. Alle Preise sind netto zuzüglich Umsatzsteuer. Grundlage ist immer die Fläche, die wir bei der Vermessung vor Ort messen, nicht die Angabe in der Anfrage. Diese Fläche können wir Ihnen transparent belegen. Bitte geben Sie die Größe deshalb in Ihrem eigenen Interesse so genau wie möglich an, damit es hinterher keine unangenehmen Überraschungen gibt.</p><p>Wir gehen immer von der von uns vermessenen <b>Grundfläche</b> aus, nicht von der Wohnfläche. Beide können deutlich voneinander abweichen, im Dachgeschoss zum Beispiel wegen der Dachschrägen. Auch alte Pläne stimmen nach Umbauten oft nicht mehr mit dem Bestand überein.</p><p><b>Alle Ebenen zählen.</b> Ein Haus hat vielleicht nur eine kleine Grundfläche, besteht aber aus zwei Etagen, dem Keller und dem Dachgeschoss. Jede Ebene wird mit ihrer vollen Fläche aufgenommen und gezählt. Wer einzelne Ebenen weglässt, bekommt ein unvollständiges Modell: Ein Dach oder ein Keller lässt sich nicht darstellen, ohne ihn zu vermessen. Wo es möglich und gewünscht ist, erfassen wir Dächer zusätzlich von außen mit dem Hochstativ. Das ist im Preis bereits enthalten und kostet nicht extra. Gerade dort sitzen oft die Heizungsanlage und andere Technik, und die sind für Interessenten häufig wichtig.</p><p>Je größer ein Objekt ist, desto günstiger wird der Preis je Quadratmeter. Der Aufwand für Anfahrt, Aufbau und Nachbereitung fällt bei einer kleinen Wohnung fast genauso an wie bei einer großen. Ab 30 km Entfernung von Erftstadt fällt wegen der gestiegenen Treibstoffpreise eine Kostenpauschale von 20 € netto an. Besondere Umstände und Sonderwünsche besprechen wir vorab persönlich, der endgültige Preis steht dann in unserem Angebot.</p><p>Die Eckpreise mit Beispielen finden Sie auf der Seite <a href="3d-rundgang-kosten/">Was kostet ein 3D-Rundgang?</a></p></details>
     <details><summary>Wie lange dauert die Aufnahme?</summary><p>Das hängt von Größe und Zuschnitt des Objekts ab. Nach Ihrer Anfrage nennen wir Ihnen einen realistischen Zeitrahmen.</p></details>
-    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste.</p></details>
+    <details><summary>Muss ich das Objekt vorbereiten?</summary><p>Aufgeräumte Räume wirken im Rundgang am besten. Vor dem Termin senden wir Ihnen eine kurze Checkliste. Wie die Aufnahme abläuft, vom Termin bis zum Link, steht auf der Seite <a href="3d-rundgang-erstellen-lassen/">3D-Rundgang erstellen lassen</a>.</p></details>
     <details><summary>Was unterscheidet Matterport und Leica BLK?</summary><p>Matterport erzeugt den begehbaren Rundgang schnell und anschaulich. Der Leica BLK ist ein Laserscanner für besonders genaue Maße und komplexe Objekte. Wir wählen das passende System für Ihr Projekt.</p></details>
     <details><summary>Bieten Sie auch klassische Fotos an?</summary><p>Ja. Wir fotografieren Immobilien, Objekte und Architektur für Portale, Exposés und Werbung, auch in Kombination mit dem Rundgang.</p></details>
-    <details><summary>Kann mein Rundgang dauerhaft online bleiben?</summary><p>Ja. Viele Rundgänge sollen länger sichtbar sein als die erste Vermarktung, zum Beispiel bei Schulen, Hotels oder Eventlocations. Wir halten Ihren Rundgang für Sie im Netz und bleiben Ihre feste Ansprechperson für Änderungen und Fragen. Ein eigenes Matterport-Konto brauchen Sie dafür nicht. Bei Rundgängen, die wir für Sie aufgenommen haben, sind die ersten sechs Monate Hosting im Preis enthalten, danach kostet es bei Bedarf 6 € netto je Monat. Einen Rundgang, den jemand anderes erstellt hat, halten wir für 15 € netto im Monat oder 180 € netto im Jahr online, jeweils zuzüglich Umsatzsteuer. Alles Weitere, etwa eine eigene Einstiegsseite, Änderungen im Jahr oder mehrjährige Laufzeiten, besprechen wir persönlich und vereinbaren es mit Ihnen. Wenn Sie den Rundgang später selbst verwalten möchten, übertragen wir ihn in Ihr eigenes Konto.</p></details>
+    <details><summary>Kann mein Rundgang dauerhaft online bleiben?</summary><p>Ja. Viele Rundgänge sollen länger sichtbar sein als die erste Vermarktung, zum Beispiel bei Schulen, Hotels oder Eventlocations. Wir halten Ihren Rundgang für Sie im Netz und bleiben Ihre feste Ansprechperson für Änderungen und Fragen. Ein eigenes Matterport-Konto brauchen Sie dafür nicht. Bei Rundgängen, die wir für Sie aufgenommen haben, sind die ersten sechs Monate online im Preis enthalten. Vom siebten bis zum zwölften Monat kostet es 6 € netto im Monat, ab dem dreizehnten 12 € netto im Monat, als Jahresrechnung 144 €. Für einen Rundgang, den jemand anderes aufgenommen hat, gelten 12 € netto ab dem ersten Monat. Die ganze Staffel und die drei Wege am Ende stehen auf der Seite <a href="3d-rundgang-kosten/">Was kostet ein 3D-Rundgang?</a>, mehr für Gastgeber auf der Seite <a href="rundgang-fuer-gastgeber/">Rundgang für Gastgeber</a>.</p></details>
   </div>
 </section>
 
@@ -504,11 +519,11 @@ R.dataset.look=get()||sun();})();
   <a class="logo" href="#top">imm<b>bild</b><i>.de</i></a>
   <p>Alexander Werner · Lechenicher Straße 4 · 50374 Erftstadt</p>
   <p>Neben Aufträgen dokumentieren wir ohne Auftrag, was nicht verloren gehen soll: <a href="freie-projekte/">Freie Projekte</a></p>
-  <p><a href="3d-rundgang-kosten/">Was kostet ein 3D-Rundgang?</a></p>
-  <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="#top">Nach oben ↑</a></p>
+  <p><a href="rundgang-fuer-gastgeber/">Rundgang für Gastgeber</a> · <a href="3d-rundgang-erstellen-lassen/">3D-Rundgang erstellen lassen</a> · <a href="3d-rundgang-kosten/">Was kostet ein 3D-Rundgang?</a> · <a href="firmenportraet/">Firmenporträt</a></p>
+  <p><a href="ueber-uns/">Über uns</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="#top">Nach oben ↑</a></p>
 </footer>
 
-<script src="script.js"></script>
+<script src="script.js?v=261107"></script>
 <script src="tracker.js" defer></script>
 </body>
 </html>

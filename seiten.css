@@ -1,0 +1,71 @@
+/* Unterseiten von immbild. (Kosten, erstellen lassen, Gastgeber, Firmenporträt, Über uns)
+   Lädt zusätzlich zu /style.css und /freie-projekte/freie-projekte.css */
+
+/* Tabellen (Preise, Staffeln) */
+.s-table { width: 100%; max-width: 620px; border-collapse: collapse; margin: 1.2rem 0 .6rem; font-variant-numeric: tabular-nums; }
+.s-table caption { text-align: left; color: var(--muted); font-size: .9rem; padding-bottom: .6rem; }
+.s-table th, .s-table td { text-align: left; padding: .75rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.s-table thead th { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+.s-table td:last-child, .s-table th:last-child { text-align: right; }
+.s-table tbody td:last-child { color: var(--ink); font-weight: 700; }
+.s-table tbody td:first-child { color: var(--text-2); }
+html[data-look] .s-table th, html[data-look] .s-table td { border-color: rgba(var(--fg-rgb), .35); }
+
+/* Listen, Hinweise, Knöpfe */
+.fp-intro h1 .grad { white-space: nowrap; }
+.s-note { color: var(--muted) !important; font-size: .95rem; }
+.s-list { padding-left: 1.2rem; margin: .4rem 0 0; }
+.s-list li { margin: .5rem 0; }
+.s-list b { color: var(--ink); }
+.s-cta { display: flex; flex-wrap: wrap; gap: .8rem; margin: 1.4rem 0 0; }
+.fp-section h3 { font-size: 1.2rem; margin: 1.8rem 0 .4rem; color: var(--ink); }
+.fp-section h2 + h3 { margin-top: .4rem; }
+
+/* Ablauf in Schritten */
+.s-steps { list-style: none; padding: 0; margin: 1rem 0 0; counter-reset: schritt; }
+.s-steps li { position: relative; padding: .2rem 0 1.2rem 3rem; counter-increment: schritt; }
+.s-steps li::before { content: counter(schritt); position: absolute; left: 0; top: 0; width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold); display: grid; place-items: center; font-weight: 700; font-size: .95rem; }
+.s-steps b { display: block; color: var(--ink); margin-bottom: .2rem; }
+.s-steps p { margin: 0; }
+
+/* Fragen und Antworten: jede Frage eine Überschrift */
+.s-faq h3 { font-size: 1.2rem; margin: 1.8rem 0 .4rem; color: var(--ink); }
+.s-faq h2 + h3 { margin-top: .4rem; }
+.s-faq p { margin: 0; }
+
+/* Verfasserzeile */
+.s-autor { margin-top: 1.6rem; color: var(--muted) !important; font-size: .9rem; }
+
+/* Weiterführende Seiten als Kacheln */
+.s-weiter { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .8rem; max-width: none !important; margin: 1.2rem 0 0; padding: 0; list-style: none; }
+.s-weiter a { display: block; padding: 1rem 1.2rem; border: 1px solid var(--line); border-radius: 14px; text-decoration: none; color: var(--ink) !important; background: var(--card); }
+.s-weiter a:hover { border-color: var(--gold); }
+.s-weiter small { display: block; margin-top: .2rem; color: var(--muted); font-size: .88rem; }
+html[data-look] .s-weiter a { background: var(--panel); border-color: rgba(var(--fg-rgb), .35); }
+
+/* Zitat in den Worten des Kunden */
+.s-zitat { border-left: 3px solid var(--gold); padding: .2rem 0 .2rem 1.2rem; margin: 1.2rem 0; font-size: 1.1rem; color: var(--ink); }
+.s-zitat p { margin: 0 0 .4em; color: var(--ink); }
+.s-zitat small { color: var(--muted); font-size: .88rem; }
+
+/* Kacheln der Porträt-Sammlung */
+.s-kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; max-width: none !important; margin: 1.2rem 0 0; padding: 0; list-style: none; }
+.s-kacheln li { border: 1px dashed var(--line); border-radius: var(--radius); padding: 1.4rem; color: var(--muted); }
+.s-kacheln b { display: block; color: var(--ink); margin-bottom: .3rem; }
+html[data-look] .s-kacheln li { border-color: rgba(var(--fg-rgb), .35); }
+
+/* Fakten-Kasten (Über uns) */
+.s-fakten { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; max-width: none !important; margin: 1.4rem 0 0; padding: 0; list-style: none; }
+.s-fakten li { background: var(--bg); padding: 1.1rem 1.3rem; }
+.s-fakten b { display: block; color: var(--ink); font-size: 1.05rem; line-height: 1.3; }
+.s-fakten small { display: block; margin-top: .25rem; color: var(--muted); font-size: .88rem; }
+html[data-look] .s-fakten { border-color: rgba(var(--fg-rgb), .35); }
+html[data-look] .s-fakten li { background: var(--panel); }
+
+/* Porträtfoto auf Über uns */
+.s-portrait { display: flex; gap: 1.4rem; align-items: center; flex-wrap: wrap; margin: 1.2rem 0 0; }
+.s-portrait img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
+.s-portrait img.hoch { width: 300px; max-width: 100%; height: auto; border-radius: 14px; } /* Hochformat-Foto mit Hochstativ */
+
+/* Lücken, die vor dem Upload gefüllt werden müssen (dürfen nie live gehen) */
+.LUECKE { background: #ffe600; color: #000; padding: .1em .4em; border-radius: 4px; font-weight: 700; }

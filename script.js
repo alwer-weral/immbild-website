@@ -811,8 +811,9 @@ const who = [
         'Zeit sparen: Interessenten sehen das Objekt vorab am Bildschirm, Makler führen weniger Besichtigungen durch, und der Scan liefert zugleich Maße und Grundriss. Aktuelle Pläne sind eine gute Grundlage für Gespräche mit Bank oder Gutachter.'],
     s: [{ n: 'Matterport, Studien 2020 (US-Märkte)', u: 'https://matterport.com/blog/3d-tours-properties-sell-31-faster-and-higher-price' }] }
 ];
-const whoBody = $('#whoBody');
+const whoBody = $('#whoBody');   // seit 07.11.2026 nicht mehr auf der Startseite (drei Türen statt Reiter); Block bleibt für den Fall, dass die Reiter zurückkommen
 function showWho(i) {
+  if (!whoBody) return;
   const w = who[i];
   $('#whoTitle').textContent = w.t; $('#whoText').textContent = w.p;
   $('#whoList').innerHTML = w.l.map(x => `<li>${x}</li>`).join('');
@@ -825,7 +826,7 @@ $$('.wt').forEach(b => b.addEventListener('click', () => {
   $$('.wt').forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
   b.classList.add('active'); b.setAttribute('aria-selected', 'true'); showWho(+b.dataset.i);
 }));
-showWho(0);
+if (whoBody) showWho(0);
 
 /* ---------- Zeitleiste ---------- */
 const timeline = $('#timeline');
